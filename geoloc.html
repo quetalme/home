@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Compartilhar Localização</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 40px; }
+    button { font-size: 18px; padding: 12px 20px; border-radius: 8px; border: none; background: #25d366; color: white; cursor: pointer; }
+    button:disabled { background: gray; }
+  </style>
+</head>
+<body>
+  <h2>📍 Compartilhar sua localização</h2>
+  <p>Clique no botão abaixo para enviar sua localização com segurança.</p>
+  <button id="btn">Enviar Localização</button>
+  
+  <h2>📍 Comparte tu ubicación</h2>
+  <p>Haga clic en el botón a continuación para enviar su ubicación de forma segura.</p>
+  <button id="btn">Enviar ubicación</button>
+  
+  
+  <p id="status"></p>
+
+<script>
+const webhook = "https://n8n.quetal.me/webhook/whatsapp-loc"; // <-- altere para seu webhook do n8n
+const urlParams = new URLSearchParams(window.location.search);
+const userId = urlParams.get("id") || "anon";
+
+document.getElementById("btn").onclick = () => {
+  document.getElementById("status").innerText = "Solicitando localização...";
+  if (!navigator.geolocation) {
+    document.getElementById("status").innerText = "Geolocation não suportado.";
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const data = {
+      userId: userId,
+      latitude: pos.coords.latitude,
+      longitude: pos.coords.longitude,
+      accuracy: pos.coords.accuracy,
+      timestamp: pos.timestamp
+    };
+    try {
+      await fetch(webhook, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      document.getElementById("status").innerText = "✅ Localização enviada com sucesso!";
+      document.getElementById("btn").disabled = true;
+    } catch (err) {
+      document.getElementById("status").innerText = "❌ Erro ao enviar: " + err;
+    }
+  }, (err) => {
+    document.getElementById("status").innerText = "⚠️ Permissão negada ou erro: " + err.message;
+  }, { enableHighAccuracy: true, timeout: 10000 });
+};
+</script>
+</body>
+</html>
