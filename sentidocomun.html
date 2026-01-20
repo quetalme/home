@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda Online</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #2D5016;
+            --primary-light: #4A7C23;
+            --primary-dark: #1A3009;
+            --accent: #F4A826;
+            --accent-light: #FFD93D;
+            --bg: #FEFEF9;
+            --bg-card: #FFFFFF;
+            --text: #1A1A1A;
+            --text-muted: #6B7280;
+            --text-light: #9CA3AF;
+            --border: #E5E7EB;
+            --success: #10B981;
+            --error: #EF4444;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Header */
+        header {
+            position: sticky;
+            top: 0;
+            background: rgba(254, 254, 249, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            padding: 12px 20px;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            object-fit: cover;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            position: relative;
+        }
+
+        .lang-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            transition: all 0.2s;
+        }
+
+        .lang-btn:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .lang-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-lg);
+            min-width: 180px;
+            max-height: 320px;
+            overflow-y: auto;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s;
+            z-index: 200;
+        }
+
+        .lang-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .lang-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-size: 14px;
+        }
+
+        .lang-option:hover {
+            background: var(--bg);
+        }
+
+        .lang-option.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .lang-flag {
+            font-size: 18px;
+        }
+
+        /* Cart Button */
+        .cart-btn {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .cart-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        .cart-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: var(--accent);
+            color: var(--primary-dark);
+            font-size: 12px;
+            font-weight: 700;
+            min-width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--bg);
+        }
+
+        .cart-count.empty {
+            display: none;
+        }
+
+        /* Main Content */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px 100px;
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid var(--accent);
+            display: inline-block;
+        }
+
+        /* Products Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        /* Product Card */
+        .product-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .product-card.unavailable {
+            opacity: 0.6;
+            filter: grayscale(40%);
+        }
+
+        .product-card.unavailable:hover {
+            transform: none;
+        }
+
+        .product-image-container {
+            position: relative;
+            width: 100%;
+            padding-top: 75%;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+        }
+
+        .product-image {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+
+        .product-status-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            padding: 6px 12px;
+            background: var(--error);
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+
+        .product-info {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .product-description {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-prices {
+            margin-bottom: 16px;
+        }
+
+        .price-main {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .price-secondary {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        .add-to-cart-btn {
+            width: 100%;
+            padding: 14px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .add-to-cart-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .add-to-cart-btn:disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+        }
+
+        .add-to-cart-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Sidebar Cart */
+        .cart-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 500;
+        }
+
+        .cart-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            max-width: 420px;
+            height: 100%;
+            background: var(--bg-card);
+            box-shadow: -10px 0 40px rgba(0,0,0,0.15);
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 501;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-sidebar.show {
+            transform: translateX(0);
+        }
+
+        .cart-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .cart-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        .cart-close {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .cart-close:hover {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px;
+        }
+
+        .cart-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .cart-empty svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cart-item-image {
+            width: 80px;
+            height: 80px;
+            border-radius: var(--radius-sm);
+            object-fit: cover;
+            background: var(--bg);
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .cart-item-price {
+            font-size: 14px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .cart-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .qty-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            color: var(--text);
+            transition: all 0.15s;
+        }
+
+        .qty-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .cart-item-qty {
+            font-weight: 600;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .remove-item {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: var(--error);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.15s;
+        }
+
+        .remove-item:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .cart-observations {
+            padding: 0 24px 20px;
+        }
+
+        .observations-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .observations-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+            transition: border-color 0.2s;
+        }
+
+        .observations-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .cart-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        .cart-totals {
+            margin-bottom: 16px;
+        }
+
+        .cart-total-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 4px;
+        }
+
+        .cart-total-secondary {
+            text-align: right;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 16px 24px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+
+        .checkout-btn:hover {
+            background: #059669;
+            transform: scale(1.02);
+        }
+
+        .checkout-btn:disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .checkout-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Error State */
+        .error-message {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .error-message h2 {
+            color: var(--error);
+            margin-bottom: 12px;
+        }
+
+        .error-message p {
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .brand-name {
+                font-size: 1.1rem;
+            }
+
+            .brand-logo {
+                width: 40px;
+                height: 40px;
+            }
+
+            .lang-btn span:not(.lang-flag) {
+                display: none;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 16px;
+            }
+
+            .product-info {
+                padding: 14px;
+            }
+
+            .product-name {
+                font-size: 1rem;
+            }
+
+            .price-main {
+                font-size: 1.2rem;
+            }
+
+            .section-title {
+                font-size: 1.4rem;
+            }
+
+            .cart-sidebar {
+                max-width: 100%;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .product-card {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .product-card:nth-child(1) { animation-delay: 0.05s; }
+        .product-card:nth-child(2) { animation-delay: 0.1s; }
+        .product-card:nth-child(3) { animation-delay: 0.15s; }
+        .product-card:nth-child(4) { animation-delay: 0.2s; }
+        .product-card:nth-child(5) { animation-delay: 0.25s; }
+        .product-card:nth-child(6) { animation-delay: 0.3s; }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--primary-dark);
+            color: white;
+            padding: 14px 24px;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            z-index: 600;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader"></div>
+        <p class="loading-text" id="loadingText">Cargando...</p>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="brand">
+                <img src="" alt="Logo" class="brand-logo" id="brandLogo">
+                <span class="brand-name" id="brandName">Tienda</span>
+            </div>
+            <div class="header-actions">
+                <div class="lang-selector">
+                    <button class="lang-btn" id="langBtn">
+                        <span class="lang-flag" id="currentFlag">🌐</span>
+                        <span id="currentLang">Idioma</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div class="lang-dropdown" id="langDropdown"></div>
+                </div>
+                <button class="cart-btn" id="cartBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                    <span class="cart-count empty" id="cartCount">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="mainContent">
+        <!-- Products will be loaded here -->
+    </main>
+
+    <!-- Cart Overlay -->
+    <div class="cart-overlay" id="cartOverlay"></div>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h2 class="cart-title" id="cartTitle">Mi Carrito</h2>
+            <button class="cart-close" id="cartClose">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <div class="cart-empty" id="cartEmpty">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                <p id="emptyCartText">Tu carrito está vacío</p>
+            </div>
+        </div>
+        <div class="cart-observations">
+            <label class="observations-label" id="observationsLabel" for="observations">Observaciones:</label>
+            <textarea class="observations-input" id="observations" placeholder="Ej: Sin cebolla, entregar después de las 18h..."></textarea>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-totals">
+                <div class="cart-total-main">
+                    <span>Total:</span>
+                    <span id="cartTotalMain">Gs. 0</span>
+                </div>
+                <div class="cart-total-secondary" id="cartTotalSecondary">
+                    R$ 0,00 | $ 0.00
+                </div>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                </svg>
+                <span id="checkoutText">Enviar Pedido por WhatsApp</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ==================== CONFIGURAÇÃO ====================
+        const CONFIG = {
+            SPREADSHEET_ID: '1F8tGGQwwGp9mNcLOq5BQ6U5ydMG1ZvrTAFHND5L_7y8',
+            GIDS: {
+                config: 1494689085,
+                index: 0,
+                es: 1881250516,
+                gn: 1391530202,
+                'pt-BR': 1612246364,
+                en: 504039960,
+                'zh-CN': 177165346,
+                ar: 876838950,
+                ko: 1287517198,
+                ja: 438854931,
+                de: 1111715980,
+                hi: 1216920944,
+                it: 1100206244,
+                ru: 679881944,
+                fr: 256348661,
+                fa: 938074199
+            },
+            LANGUAGES: {
+                es: { name: 'Español', flag: '🇪🇸' },
+                gn: { name: 'Guaraní', flag: '🇵🇾' },
+                'pt-BR': { name: 'Português', flag: '🇧🇷' },
+                en: { name: 'English', flag: '🇺🇸' },
+                'zh-CN': { name: '中文', flag: '🇨🇳' },
+                ar: { name: 'العربية', flag: '🇸🇦' },
+                ko: { name: '한국어', flag: '🇰🇷' },
+                ja: { name: '日本語', flag: '🇯🇵' },
+                de: { name: 'Deutsch', flag: '🇩🇪' },
+                hi: { name: 'हिन्दी', flag: '🇮🇳' },
+                it: { name: 'Italiano', flag: '🇮🇹' },
+                ru: { name: 'Русский', flag: '🇷🇺' },
+                fr: { name: 'Français', flag: '🇫🇷' },
+                fa: { name: 'فارسی', flag: '🇮🇷' }
+            },
+            TRANSLATIONS: {
+                es: {
+                    loading: 'Cargando...',
+                    myCart: 'Mi Carrito',
+                    emptyCart: 'Tu carrito está vacío',
+                    observations: 'Observaciones:',
+                    observationsPlaceholder: 'Ej: Sin cebolla, entregar después de las 18h...',
+                    total: 'Total:',
+                    sendOrder: 'Enviar Pedido por WhatsApp',
+                    addToCart: 'Agregar',
+                    unavailable: 'Agotado',
+                    remove: 'Eliminar',
+                    added: '¡Agregado al carrito!',
+                    orderTitle: '¡Hola! Me gustaría hacer el siguiente pedido:',
+                    products: 'PRODUCTOS',
+                    obs: 'OBSERVACIONES',
+                    location: 'MI UBICACIÓN',
+                    thankYou: '¡Gracias!'
+                },
+                'pt-BR': {
+                    loading: 'Carregando...',
+                    myCart: 'Meu Carrinho',
+                    emptyCart: 'Seu carrinho está vazio',
+                    observations: 'Observações:',
+                    observationsPlaceholder: 'Ex: Sem cebola, entregar após 18h...',
+                    total: 'Total:',
+                    sendOrder: 'Enviar Pedido pelo WhatsApp',
+                    addToCart: 'Adicionar',
+                    unavailable: 'Esgotado',
+                    remove: 'Remover',
+                    added: 'Adicionado ao carrinho!',
+                    orderTitle: 'Olá! Gostaria de fazer o seguinte pedido:',
+                    products: 'PRODUTOS',
+                    obs: 'OBSERVAÇÕES',
+                    location: 'MINHA LOCALIZAÇÃO',
+                    thankYou: 'Obrigado!'
+                },
+                en: {
+                    loading: 'Loading...',
+                    myCart: 'My Cart',
+                    emptyCart: 'Your cart is empty',
+                    observations: 'Notes:',
+                    observationsPlaceholder: 'E.g.: No onions, deliver after 6pm...',
+                    total: 'Total:',
+                    sendOrder: 'Send Order via WhatsApp',
+                    addToCart: 'Add',
+                    unavailable: 'Sold Out',
+                    remove: 'Remove',
+                    added: 'Added to cart!',
+                    orderTitle: 'Hello! I would like to place the following order:',
+                    products: 'PRODUCTS',
+                    obs: 'NOTES',
+                    location: 'MY LOCATION',
+                    thankYou: 'Thank you!'
+                },
+                gn: {
+                    loading: 'Oñemyenyhẽhína...',
+                    myCart: 'Che Carrito',
+                    emptyCart: 'Nde carrito ndaipóri mba\'eve',
+                    observations: 'Ñe\'ẽ:',
+                    observationsPlaceholder: 'Techapyrã: Sevói\'ỹre...',
+                    total: 'Opavave:',
+                    sendOrder: 'Emondo WhatsApp rupive',
+                    addToCart: 'Embojuaju',
+                    unavailable: 'Ndaipóri',
+                    remove: 'Emboguete',
+                    added: '¡Oñembojuaju carrito-pe!',
+                    orderTitle: 'Mba\'éichapa! Aikuaa añembyaty ko\'ã mba\'e:',
+                    products: 'MBA\'E',
+                    obs: 'ÑE\'Ẽ',
+                    location: 'CHE RENDAITE',
+                    thankYou: '¡Aguyje!'
+                },
+                'zh-CN': {
+                    loading: '加载中...',
+                    myCart: '我的购物车',
+                    emptyCart: '您的购物车是空的',
+                    observations: '备注：',
+                    observationsPlaceholder: '例如：不要洋葱，18点后送达...',
+                    total: '总计：',
+                    sendOrder: '通过WhatsApp发送订单',
+                    addToCart: '添加',
+                    unavailable: '已售罄',
+                    remove: '删除',
+                    added: '已添加到购物车！',
+                    orderTitle: '您好！我想下以下订单：',
+                    products: '产品',
+                    obs: '备注',
+                    location: '我的位置',
+                    thankYou: '谢谢！'
+                },
+                ar: {
+                    loading: 'جار التحميل...',
+                    myCart: 'سلة التسوق',
+                    emptyCart: 'سلة التسوق فارغة',
+                    observations: 'ملاحظات:',
+                    observationsPlaceholder: 'مثال: بدون بصل، التوصيل بعد 6 مساءً...',
+                    total: 'المجموع:',
+                    sendOrder: 'إرسال الطلب عبر واتساب',
+                    addToCart: 'إضافة',
+                    unavailable: 'نفذ',
+                    remove: 'حذف',
+                    added: 'تمت الإضافة إلى السلة!',
+                    orderTitle: 'مرحباً! أود تقديم الطلب التالي:',
+                    products: 'المنتجات',
+                    obs: 'ملاحظات',
+                    location: 'موقعي',
+                    thankYou: 'شكراً!'
+                },
+                ko: {
+                    loading: '로딩 중...',
+                    myCart: '장바구니',
+                    emptyCart: '장바구니가 비어 있습니다',
+                    observations: '메모:',
+                    observationsPlaceholder: '예: 양파 빼주세요, 오후 6시 이후 배달...',
+                    total: '합계:',
+                    sendOrder: 'WhatsApp으로 주문 보내기',
+                    addToCart: '추가',
+                    unavailable: '품절',
+                    remove: '삭제',
+                    added: '장바구니에 추가되었습니다!',
+                    orderTitle: '안녕하세요! 다음 주문을 하고 싶습니다:',
+                    products: '상품',
+                    obs: '메모',
+                    location: '내 위치',
+                    thankYou: '감사합니다!'
+                },
+                ja: {
+                    loading: '読み込み中...',
+                    myCart: 'カート',
+                    emptyCart: 'カートは空です',
+                    observations: 'メモ:',
+                    observationsPlaceholder: '例: 玉ねぎ抜き、18時以降配達...',
+                    total: '合計:',
+                    sendOrder: 'WhatsAppで注文を送信',
+                    addToCart: '追加',
+                    unavailable: '売り切れ',
+                    remove: '削除',
+                    added: 'カートに追加しました！',
+                    orderTitle: 'こんにちは！以下の注文をお願いします：',
+                    products: '商品',
+                    obs: 'メモ',
+                    location: '私の場所',
+                    thankYou: 'ありがとう！'
+                },
+                de: {
+                    loading: 'Laden...',
+                    myCart: 'Mein Warenkorb',
+                    emptyCart: 'Ihr Warenkorb ist leer',
+                    observations: 'Anmerkungen:',
+                    observationsPlaceholder: 'Z.B.: Ohne Zwiebeln, Lieferung nach 18 Uhr...',
+                    total: 'Gesamt:',
+                    sendOrder: 'Bestellung per WhatsApp senden',
+                    addToCart: 'Hinzufügen',
+                    unavailable: 'Ausverkauft',
+                    remove: 'Entfernen',
+                    added: 'Zum Warenkorb hinzugefügt!',
+                    orderTitle: 'Hallo! Ich möchte folgende Bestellung aufgeben:',
+                    products: 'PRODUKTE',
+                    obs: 'ANMERKUNGEN',
+                    location: 'MEIN STANDORT',
+                    thankYou: 'Danke!'
+                },
+                hi: {
+                    loading: 'लोड हो रहा है...',
+                    myCart: 'मेरी कार्ट',
+                    emptyCart: 'आपकी कार्ट खाली है',
+                    observations: 'टिप्पणियाँ:',
+                    observationsPlaceholder: 'उदा: प्याज नहीं, शाम 6 बजे के बाद डिलीवरी...',
+                    total: 'कुल:',
+                    sendOrder: 'WhatsApp पर ऑर्डर भेजें',
+                    addToCart: 'जोड़ें',
+                    unavailable: 'स्टॉक में नहीं',
+                    remove: 'हटाएं',
+                    added: 'कार्ट में जोड़ा गया!',
+                    orderTitle: 'नमस्ते! मैं निम्नलिखित ऑर्डर देना चाहूंगा:',
+                    products: 'उत्पाद',
+                    obs: 'टिप्पणियाँ',
+                    location: 'मेरा स्थान',
+                    thankYou: 'धन्यवाद!'
+                },
+                it: {
+                    loading: 'Caricamento...',
+                    myCart: 'Il mio Carrello',
+                    emptyCart: 'Il tuo carrello è vuoto',
+                    observations: 'Note:',
+                    observationsPlaceholder: 'Es: Senza cipolla, consegna dopo le 18...',
+                    total: 'Totale:',
+                    sendOrder: 'Invia Ordine via WhatsApp',
+                    addToCart: 'Aggiungi',
+                    unavailable: 'Esaurito',
+                    remove: 'Rimuovi',
+                    added: 'Aggiunto al carrello!',
+                    orderTitle: 'Ciao! Vorrei effettuare il seguente ordine:',
+                    products: 'PRODOTTI',
+                    obs: 'NOTE',
+                    location: 'LA MIA POSIZIONE',
+                    thankYou: 'Grazie!'
+                },
+                ru: {
+                    loading: 'Загрузка...',
+                    myCart: 'Моя Корзина',
+                    emptyCart: 'Ваша корзина пуста',
+                    observations: 'Примечания:',
+                    observationsPlaceholder: 'Напр.: Без лука, доставка после 18:00...',
+                    total: 'Итого:',
+                    sendOrder: 'Отправить заказ через WhatsApp',
+                    addToCart: 'Добавить',
+                    unavailable: 'Нет в наличии',
+                    remove: 'Удалить',
+                    added: 'Добавлено в корзину!',
+                    orderTitle: 'Здравствуйте! Хочу сделать следующий заказ:',
+                    products: 'ТОВАРЫ',
+                    obs: 'ПРИМЕЧАНИЯ',
+                    location: 'МОЁ МЕСТОПОЛОЖЕНИЕ',
+                    thankYou: 'Спасибо!'
+                },
+                fr: {
+                    loading: 'Chargement...',
+                    myCart: 'Mon Panier',
+                    emptyCart: 'Votre panier est vide',
+                    observations: 'Notes:',
+                    observationsPlaceholder: 'Ex: Sans oignon, livraison après 18h...',
+                    total: 'Total:',
+                    sendOrder: 'Envoyer la commande via WhatsApp',
+                    addToCart: 'Ajouter',
+                    unavailable: 'Épuisé',
+                    remove: 'Supprimer',
+                    added: 'Ajouté au panier!',
+                    orderTitle: 'Bonjour! Je voudrais passer la commande suivante:',
+                    products: 'PRODUITS',
+                    obs: 'NOTES',
+                    location: 'MA LOCALISATION',
+                    thankYou: 'Merci!'
+                },
+                fa: {
+                    loading: 'در حال بارگذاری...',
+                    myCart: 'سبد خرید من',
+                    emptyCart: 'سبد خرید شما خالی است',
+                    observations: 'یادداشت:',
+                    observationsPlaceholder: 'مثال: بدون پیاز، تحویل بعد از ساعت 6 عصر...',
+                    total: 'جمع کل:',
+                    sendOrder: 'ارسال سفارش از طریق واتساپ',
+                    addToCart: 'افزودن',
+                    unavailable: 'ناموجود',
+                    remove: 'حذف',
+                    added: 'به سبد خرید اضافه شد!',
+                    orderTitle: 'سلام! می‌خواهم سفارش زیر را ثبت کنم:',
+                    products: 'محصولات',
+                    obs: 'یادداشت',
+                    location: 'موقعیت من',
+                    thankYou: 'متشکرم!'
+                }
+            }
+        };
+
+        // ==================== STATE ====================
+        let state = {
+            config: {},
+            products: [],
+            translations: [],
+            cart: [],
+            currentLang: 'es',
+            whatsappNumber: ''
+        };
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function getSheetUrl(gid) {
+            return `https://docs.google.com/spreadsheets/d/${CONFIG.SPREADSHEET_ID}/export?format=csv&gid=${gid}`;
+        }
+
+        async function fetchSheetData(gid) {
+            try {
+                const response = await fetch(getSheetUrl(gid));
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const text = await response.text();
+                return parseCSV(text);
+            } catch (error) {
+                console.error('Error fetching sheet:', error);
+                return [];
+            }
+        }
+
+        function parseCSV(text) {
+            const rows = [];
+            let currentRow = [];
+            let currentCell = '';
+            let insideQuotes = false;
+            
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const nextChar = text[i + 1];
+                
+                if (insideQuotes) {
+                    if (char === '"' && nextChar === '"') {
+                        currentCell += '"';
+                        i++;
+                    } else if (char === '"') {
+                        insideQuotes = false;
+                    } else {
+                        currentCell += char;
+                    }
+                } else {
+                    if (char === '"') {
+                        insideQuotes = true;
+                    } else if (char === ',') {
+                        currentRow.push(currentCell.trim());
+                        currentCell = '';
+                    } else if (char === '\n' || (char === '\r' && nextChar === '\n')) {
+                        currentRow.push(currentCell.trim());
+                        if (currentRow.some(cell => cell !== '')) {
+                            rows.push(currentRow);
+                        }
+                        currentRow = [];
+                        currentCell = '';
+                        if (char === '\r') i++;
+                    } else if (char !== '\r') {
+                        currentCell += char;
+                    }
+                }
+            }
+            
+            if (currentCell || currentRow.length > 0) {
+                currentRow.push(currentCell.trim());
+                if (currentRow.some(cell => cell !== '')) {
+                    rows.push(currentRow);
+                }
+            }
+            
+            return rows;
+        }
+
+        function detectLanguage() {
+            const browserLang = navigator.language || navigator.userLanguage;
+            const langCode = browserLang.toLowerCase();
+            
+            // Check exact match first
+            if (CONFIG.LANGUAGES[langCode]) return langCode;
+            
+            // Check partial match
+            const shortCode = langCode.split('-')[0];
+            for (const key of Object.keys(CONFIG.LANGUAGES)) {
+                if (key.startsWith(shortCode)) return key;
+            }
+            
+            // Default to Spanish (region is Paraguay)
+            return 'es';
+        }
+
+        function getTranslation(key) {
+            const lang = state.currentLang;
+            return CONFIG.TRANSLATIONS[lang]?.[key] || CONFIG.TRANSLATIONS.es[key] || key;
+        }
+
+        function formatPrice(value, currency) {
+            if (!value) return '';
+            return value.toString();
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        // ==================== DATA LOADING ====================
+        async function loadConfig() {
+            const data = await fetchSheetData(CONFIG.GIDS.config);
+            const config = {};
+            // A aba Config é vertical: coluna A = chave, coluna B = valor
+            data.forEach(row => {
+                if (row[0] && row.length > 1) {
+                    // Normaliza a chave: lowercase, remove acentos, substitui espaços por _
+                    const key = row[0].toLowerCase()
+                        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                        .replace(/\s+/g, '_');
+                    config[key] = row[1] || '';
+                }
+            });
+            console.log('Config loaded:', config);
+            return config;
+        }
+
+        async function loadProducts() {
+            const data = await fetchSheetData(CONFIG.GIDS.index);
+            // Skip header row
+            return data.slice(1).filter(row => row[1]).map(row => ({
+                section: row[0] || '',
+                id: row[1] || '',
+                name: row[2] || '',
+                description: row[3] || '',
+                status: row[4] || '',
+                priceGuarani: row[5] || '',
+                priceReal: row[6] || '',
+                priceDolar: row[7] || '',
+                image: row[8] || ''
+            }));
+        }
+
+        async function loadTranslations(langCode) {
+            const gid = CONFIG.GIDS[langCode];
+            if (!gid) return [];
+            
+            const data = await fetchSheetData(gid);
+            // Skip header row
+            return data.slice(1).filter(row => row[1]).map(row => ({
+                lang: row[0] || langCode,
+                section: row[1] || '',
+                name: row[2] || '',
+                description: row[3] || '',
+                status: row[4] || ''
+            }));
+        }
+
+        // ==================== UI RENDERING ====================
+        function renderLanguageDropdown() {
+            const dropdown = document.getElementById('langDropdown');
+            dropdown.innerHTML = Object.entries(CONFIG.LANGUAGES).map(([code, lang]) => `
+                <div class="lang-option ${code === state.currentLang ? 'active' : ''}" data-lang="${code}">
+                    <span class="lang-flag">${lang.flag}</span>
+                    <span>${lang.name}</span>
+                </div>
+            `).join('');
+
+            dropdown.querySelectorAll('.lang-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    changeLanguage(option.dataset.lang);
+                    dropdown.classList.remove('show');
+                });
+            });
+        }
+
+        function updateLanguageButton() {
+            const lang = CONFIG.LANGUAGES[state.currentLang];
+            document.getElementById('currentFlag').textContent = lang.flag;
+            document.getElementById('currentLang').textContent = lang.name;
+        }
+
+        function updateUITranslations() {
+            document.getElementById('loadingText').textContent = getTranslation('loading');
+            document.getElementById('cartTitle').textContent = getTranslation('myCart');
+            document.getElementById('emptyCartText').textContent = getTranslation('emptyCart');
+            document.getElementById('observationsLabel').textContent = getTranslation('observations');
+            document.getElementById('observations').placeholder = getTranslation('observationsPlaceholder');
+            document.getElementById('checkoutText').textContent = getTranslation('sendOrder');
+            document.documentElement.lang = state.currentLang;
+        }
+
+        function renderProducts() {
+            const main = document.getElementById('mainContent');
+            
+            // Group products by section
+            const sections = {};
+            state.products.forEach((product, index) => {
+                const translation = state.translations[index] || {};
+                const section = translation.section || product.section || 'Otros';
+                
+                if (!sections[section]) {
+                    sections[section] = [];
+                }
+                
+                sections[section].push({
+                    ...product,
+                    translatedName: translation.name || product.name,
+                    translatedDescription: translation.description || product.description,
+                    translatedStatus: translation.status || product.status
+                });
+            });
+
+            // Render sections
+            main.innerHTML = Object.entries(sections).map(([sectionName, products]) => `
+                <section class="section">
+                    <h2 class="section-title">${sectionName}</h2>
+                    <div class="products-grid">
+                        ${products.map(product => renderProductCard(product)).join('')}
+                    </div>
+                </section>
+            `).join('');
+
+            // Add event listeners to add buttons
+            main.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const productId = btn.dataset.id;
+                    addToCart(productId);
+                });
+            });
+        }
+
+        function renderProductCard(product) {
+            const isUnavailable = product.translatedStatus?.toLowerCase().includes('esgotado') ||
+                                  product.translatedStatus?.toLowerCase().includes('agotado') ||
+                                  product.translatedStatus?.toLowerCase().includes('sold out') ||
+                                  product.translatedStatus?.toLowerCase().includes('unavailable') ||
+                                  product.status?.toLowerCase().includes('esgotado') ||
+                                  product.status?.toLowerCase().includes('agotado');
+
+            return `
+                <article class="product-card ${isUnavailable ? 'unavailable' : ''}">
+                    <div class="product-image-container">
+                        <img src="${product.image || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f0f0f0" width="100" height="100"/%3E%3C/svg%3E'}" 
+                             alt="${product.translatedName}" 
+                             class="product-image"
+                             loading="lazy"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22100%22 height=%22100%22/%3E%3C/svg%3E'">
+                        ${isUnavailable ? `<span class="product-status-badge">${getTranslation('unavailable')}</span>` : ''}
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">${product.translatedName}</h3>
+                        <p class="product-description">${product.translatedDescription}</p>
+                        <div class="product-prices">
+                            <div class="price-main">${product.priceGuarani}</div>
+                            <div class="price-secondary">${product.priceReal} | ${product.priceDolar}</div>
+                        </div>
+                        <button class="add-to-cart-btn" data-id="${product.id}" ${isUnavailable ? 'disabled' : ''}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            ${getTranslation('addToCart')}
+                        </button>
+                    </div>
+                </article>
+            `;
+        }
+
+        function renderCart() {
+            const cartItems = document.getElementById('cartItems');
+            const cartEmpty = document.getElementById('cartEmpty');
+            const cartCount = document.getElementById('cartCount');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            
+            const totalItems = state.cart.reduce((sum, item) => sum + item.qty, 0);
+            
+            cartCount.textContent = totalItems;
+            cartCount.classList.toggle('empty', totalItems === 0);
+            checkoutBtn.disabled = totalItems === 0;
+
+            if (state.cart.length === 0) {
+                cartEmpty.style.display = 'block';
+                return;
+            }
+
+            cartEmpty.style.display = 'none';
+
+            const itemsHtml = state.cart.map(item => {
+                const product = state.products.find(p => p.id === item.id);
+                const translation = state.translations[state.products.indexOf(product)] || {};
+                
+                return `
+                    <div class="cart-item">
+                        <img src="${product?.image || ''}" alt="${translation.name || product?.name}" class="cart-item-image"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22100%22 height=%22100%22/%3E%3C/svg%3E'">
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${translation.name || product?.name}</div>
+                            <div class="cart-item-price">${product?.priceGuarani}</div>
+                            <div class="cart-item-controls">
+                                <button class="qty-btn" data-action="decrease" data-id="${item.id}">−</button>
+                                <span class="cart-item-qty">${item.qty}</span>
+                                <button class="qty-btn" data-action="increase" data-id="${item.id}">+</button>
+                                <button class="remove-item" data-id="${item.id}">${getTranslation('remove')}</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Insert items before empty div
+            const existingItems = cartItems.querySelectorAll('.cart-item');
+            existingItems.forEach(item => item.remove());
+            cartEmpty.insertAdjacentHTML('beforebegin', itemsHtml);
+
+            // Add event listeners
+            cartItems.querySelectorAll('.qty-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.id;
+                    const action = btn.dataset.action;
+                    updateCartQuantity(id, action);
+                });
+            });
+
+            cartItems.querySelectorAll('.remove-item').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    removeFromCart(btn.dataset.id);
+                });
+            });
+
+            updateCartTotals();
+        }
+
+        function updateCartTotals() {
+            let totalGuarani = 0;
+            let totalReal = 0;
+            let totalDolar = 0;
+
+            state.cart.forEach(item => {
+                const product = state.products.find(p => p.id === item.id);
+                if (product) {
+                    // Parse prices (remove currency symbols and formatting)
+                    const guarani = parseFloat(product.priceGuarani.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')) || 0;
+                    const real = parseFloat(product.priceReal.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')) || 0;
+                    const dolar = parseFloat(product.priceDolar.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
+
+                    totalGuarani += guarani * item.qty;
+                    totalReal += real * item.qty;
+                    totalDolar += dolar * item.qty;
+                }
+            });
+
+            document.getElementById('cartTotalMain').textContent = `Gs. ${totalGuarani.toLocaleString('es-PY')}`;
+            document.getElementById('cartTotalSecondary').textContent = `R$ ${totalReal.toLocaleString('pt-BR', {minimumFractionDigits: 2})} | $ ${totalDolar.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+        }
+
+        // ==================== CART FUNCTIONS ====================
+        function addToCart(productId) {
+            const existing = state.cart.find(item => item.id === productId);
+            if (existing) {
+                existing.qty++;
+            } else {
+                state.cart.push({ id: productId, qty: 1 });
+            }
+            renderCart();
+            showToast(getTranslation('added'));
+        }
+
+        function updateCartQuantity(productId, action) {
+            const item = state.cart.find(i => i.id === productId);
+            if (!item) return;
+
+            if (action === 'increase') {
+                item.qty++;
+            } else if (action === 'decrease') {
+                item.qty--;
+                if (item.qty <= 0) {
+                    removeFromCart(productId);
+                    return;
+                }
+            }
+            renderCart();
+        }
+
+        function removeFromCart(productId) {
+            state.cart = state.cart.filter(item => item.id !== productId);
+            renderCart();
+        }
+
+        // ==================== CHECKOUT ====================
+        async function checkout() {
+            if (state.cart.length === 0) return;
+
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            checkoutBtn.disabled = true;
+            checkoutBtn.innerHTML = `<span>${getTranslation('loading')}</span>`;
+
+            // Request location
+            let locationLink = '';
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        timeout: 10000,
+                        enableHighAccuracy: true
+                    });
+                });
+                locationLink = `https://maps.google.com/?q=${position.coords.latitude},${position.coords.longitude}`;
+            } catch (e) {
+                console.log('Location not available:', e);
+            }
+
+            // Build message
+            const t = (key) => getTranslation(key);
+            let message = `${t('orderTitle')}\n\n`;
+            message += `📦 *${t('products')}:*\n`;
+
+            let totalGuarani = 0;
+
+            state.cart.forEach(item => {
+                const product = state.products.find(p => p.id === item.id);
+                const translation = state.translations[state.products.indexOf(product)] || {};
+                const name = translation.name || product?.name || '';
+                const priceG = product?.priceGuarani || '';
+                const priceR = product?.priceReal || '';
+                
+                message += `• ${item.qty}x ${name}\n  ${priceG} (${priceR})\n`;
+
+                const guarani = parseFloat(priceG.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')) || 0;
+                totalGuarani += guarani * item.qty;
+            });
+
+            message += `\n💰 *TOTAL: Gs. ${totalGuarani.toLocaleString('es-PY')}*\n`;
+
+            const observations = document.getElementById('observations').value.trim();
+            if (observations) {
+                message += `\n📝 *${t('obs')}:*\n${observations}\n`;
+            }
+
+            if (locationLink) {
+                message += `\n📍 *${t('location')}:*\n${locationLink}\n`;
+            }
+
+            message += `\n${t('thankYou')} 🙏`;
+
+            // Open WhatsApp
+            const whatsappUrl = `https://wa.me/${state.whatsappNumber}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+
+            // Reset button
+            checkoutBtn.disabled = false;
+            checkoutBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                </svg>
+                <span>${t('sendOrder')}</span>
+            `;
+        }
+
+        // ==================== LANGUAGE CHANGE ====================
+        async function changeLanguage(langCode) {
+            if (langCode === state.currentLang) return;
+            
+            state.currentLang = langCode;
+            updateLanguageButton();
+            updateUITranslations();
+            renderLanguageDropdown();
+
+            // Reload translations
+            document.getElementById('loadingScreen').classList.remove('hidden');
+            state.translations = await loadTranslations(langCode);
+            renderProducts();
+            renderCart();
+            document.getElementById('loadingScreen').classList.add('hidden');
+        }
+
+        // ==================== EVENT LISTENERS ====================
+        function setupEventListeners() {
+            // Language dropdown toggle
+            document.getElementById('langBtn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.getElementById('langDropdown').classList.toggle('show');
+            });
+
+            // Close dropdown on outside click
+            document.addEventListener('click', () => {
+                document.getElementById('langDropdown').classList.remove('show');
+            });
+
+            // Cart sidebar toggle
+            document.getElementById('cartBtn').addEventListener('click', () => {
+                document.getElementById('cartSidebar').classList.add('show');
+                document.getElementById('cartOverlay').classList.add('show');
+            });
+
+            document.getElementById('cartClose').addEventListener('click', closeCart);
+            document.getElementById('cartOverlay').addEventListener('click', closeCart);
+
+            function closeCart() {
+                document.getElementById('cartSidebar').classList.remove('show');
+                document.getElementById('cartOverlay').classList.remove('show');
+            }
+
+            // Checkout
+            document.getElementById('checkoutBtn').addEventListener('click', checkout);
+        }
+
+        // ==================== INITIALIZATION ====================
+        async function init() {
+            try {
+                // Detect language
+                state.currentLang = detectLanguage();
+                updateLanguageButton();
+                updateUITranslations();
+                renderLanguageDropdown();
+                setupEventListeners();
+
+                console.log('Loading data from Google Sheets...');
+
+                // Load data in parallel
+                const [config, products, translations] = await Promise.all([
+                    loadConfig(),
+                    loadProducts(),
+                    loadTranslations(state.currentLang)
+                ]);
+
+                console.log('Config:', config);
+                console.log('Products:', products);
+                console.log('Translations:', translations);
+
+                state.config = config;
+                state.products = products;
+                state.translations = translations;
+                state.whatsappNumber = (config.whatsapp || '').replace(/\D/g, '');
+
+                // Update UI with config
+                const brandName = config.nome_da_empresa || config.nombre_de_la_empresa || config.name || 'Tienda';
+                const brandLogo = config.url_imagem || config.url_imagen || config.logo || '';
+                
+                document.getElementById('brandName').textContent = brandName;
+                document.getElementById('brandLogo').src = brandLogo;
+                document.title = brandName;
+
+                // Check if we have products
+                if (products.length === 0) {
+                    document.getElementById('mainContent').innerHTML = `
+                        <div class="error-message">
+                            <h2>⚠️ Sin productos</h2>
+                            <p>No se encontraron productos. Verifica que:</p>
+                            <ul style="text-align:left; max-width:400px; margin:20px auto;">
+                                <li>La planilla esté compartida como "Cualquier persona con el link puede ver"</li>
+                                <li>La aba "Index" tenga productos</li>
+                                <li>El ID de la planilla sea correcto</li>
+                            </ul>
+                            <p style="margin-top:20px; font-size:12px; color:#999;">
+                                ID: ${CONFIG.SPREADSHEET_ID}
+                            </p>
+                        </div>
+                    `;
+                } else {
+                    // Render products
+                    renderProducts();
+                }
+                
+                renderCart();
+
+                // Hide loading
+                document.getElementById('loadingScreen').classList.add('hidden');
+
+            } catch (error) {
+                console.error('Initialization error:', error);
+                document.getElementById('mainContent').innerHTML = `
+                    <div class="error-message">
+                        <h2>❌ Error de conexión</h2>
+                        <p>No se pudo cargar los datos.</p>
+                        <p style="margin-top:10px; font-size:14px; color:#666;">
+                            Error: ${error.message}
+                        </p>
+                        <p style="margin-top:20px; font-size:13px;">
+                            Verifica que la planilla esté compartida públicamente.
+                        </p>
+                    </div>
+                `;
+                document.getElementById('loadingScreen').classList.add('hidden');
+            }
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
