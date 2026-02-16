@@ -866,13 +866,14 @@
 
         function renderCard(p) {
             const unavail = (p.tStatus || p.status || '').toLowerCase().match(/esgotado|agotado|sold out|unavailable/);
-            const placeholder = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="150"%3E%3Crect fill="%23eee" width="200" height="150"/%3E%3C/svg%3E';
+            const hasImage = p.image && p.image.trim() !== '';
             return `
                 <article class="product-card ${unavail ? 'unavailable' : ''}">
+                    ${hasImage ? `
                     <div class="product-image-container">
-                        <img src="${p.image || placeholder}" alt="${p.tName}" class="product-image" loading="lazy" onerror="this.src='${placeholder}'">
+                        <img src="${p.image}" alt="${p.tName}" class="product-image" loading="lazy">
                         ${unavail ? `<span class="product-status-badge">${t('unavailable')}</span>` : ''}
-                    </div>
+                    </div>` : ''}
                     <div class="product-info">
                         <h3 class="product-name">${p.tName}</h3>
                         <p class="product-description">${p.tDesc}</p>
