@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carregando...</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #2D5016;
+            --primary-light: #4A7C23;
+            --primary-dark: #1A3009;
+            --accent: #F4A826;
+            --bg: #FEFEF9;
+            --bg-card: #FFFFFF;
+            --text: #1A1A1A;
+            --text-muted: #6B7280;
+            --text-light: #9CA3AF;
+            --border: #E5E7EB;
+            --success: #25D366;
+            --error: #EF4444;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        .loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text { margin-top: 20px; color: var(--text-muted); font-size: 14px; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        header {
+            position: sticky;
+            top: 0;
+            background: rgba(254, 254, 249, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            padding: 12px 20px;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .brand { display: flex; align-items: center; gap: 12px; }
+
+        .brand-logo {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            object-fit: cover;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+
+        .brand-logo.loaded { display: block; }
+
+        .brand-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+            width: 100%;
+        }
+
+        .header-actions { display: flex; align-items: center; gap: 12px; }
+
+        .lang-selector { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+
+        .lang-btn {
+            width: 35px;
+            height: 35px;
+            border: 2px solid transparent;
+            background: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 2px;
+            overflow: hidden;
+        }
+
+        .lang-btn img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
+        .lang-btn:hover { transform: scale(1.1); }
+        .lang-btn.active { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(45, 80, 22, 0.2); }
+
+        .cart-btn {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .cart-btn:hover { background: var(--primary-dark); transform: scale(1.05); }
+        .cart-btn svg { width: 24px; height: 24px; }
+
+        .cart-count {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: var(--accent);
+            color: var(--primary-dark);
+            font-size: 12px;
+            font-weight: 700;
+            min-width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--bg);
+        }
+
+        .cart-count.empty { display: none; }
+
+        main { max-width: 1400px; margin: 0 auto; padding: 30px 20px 100px; }
+
+        .section { margin-bottom: 50px; }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid var(--accent);
+            display: inline-block;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .product-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .product-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+        .product-card.unavailable { opacity: 0.6; filter: grayscale(40%); }
+        .product-card.unavailable:hover { transform: none; }
+
+        .product-image-container {
+            position: relative;
+            width: 100%;
+            padding-top: 75%;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+        }
+
+        .product-image {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s;
+        }
+
+        .product-card:hover .product-image { transform: scale(1.05); }
+
+        .product-status-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            padding: 6px 12px;
+            background: var(--error);
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+
+        .product-info { 
+            padding: 20px; 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .product-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            word-break: break-word;
+        }
+
+        .product-description {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            word-break: break-word;
+        }
+
+        .product-prices { margin-bottom: 16px; white-space: nowrap; }
+        .price-main { font-size: 1.5rem; font-weight: 700; color: var(--primary); white-space: nowrap; }
+        .price-secondary { font-size: 13px; color: var(--text-light); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .add-to-cart-btn {
+            width: 100%;
+            padding: 14px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .add-to-cart-btn:hover { background: var(--primary-dark); }
+        .add-to-cart-btn:disabled { background: var(--text-light); cursor: not-allowed; }
+        .add-to-cart-btn svg { width: 20px; height: 20px; }
+
+        .cart-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 500;
+        }
+
+        .cart-overlay.show { opacity: 1; visibility: visible; }
+
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            max-width: 420px;
+            height: 100%;
+            background: var(--bg-card);
+            box-shadow: -10px 0 40px rgba(0,0,0,0.15);
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 501;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-sidebar.show { transform: translateX(0); }
+
+        .cart-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .cart-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        .cart-close {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .cart-close:hover { background: var(--border); color: var(--text); }
+
+        .cart-items { flex: 1; overflow-y: auto; padding: 20px 24px; }
+
+        .cart-empty { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+        .cart-empty svg { width: 80px; height: 80px; margin-bottom: 20px; opacity: 0.3; }
+
+        .cart-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cart-item-image {
+            width: 80px;
+            height: 80px;
+            border-radius: var(--radius-sm);
+            object-fit: cover;
+            background: var(--bg);
+        }
+
+        .cart-item-info { flex: 1; }
+        .cart-item-name { font-weight: 600; color: var(--text); margin-bottom: 4px; }
+        .cart-item-price { font-size: 14px; color: var(--primary); font-weight: 600; }
+
+        .cart-item-controls { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+
+        .qty-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            color: var(--text);
+            transition: all 0.15s;
+        }
+
+        .qty-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .cart-item-qty { font-weight: 600; min-width: 24px; text-align: center; }
+
+        .remove-item {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: var(--error);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.15s;
+        }
+
+        .remove-item:hover { background: rgba(239, 68, 68, 0.1); }
+
+        .cart-observations { padding: 0 24px 20px; }
+
+        .observations-label { display: block; font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+
+        .observations-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+            transition: border-color 0.2s;
+        }
+
+        .observations-input:focus { outline: none; border-color: var(--primary); }
+
+        .cart-footer { padding: 20px 24px; border-top: 1px solid var(--border); background: var(--bg); }
+
+        .cart-totals { margin-bottom: 16px; }
+
+        .cart-total-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 4px;
+        }
+
+        .cart-total-secondary { text-align: right; font-size: 13px; color: var(--text-muted); }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 16px 24px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+
+        .checkout-btn:hover { background: #128C7E; transform: scale(1.02); }
+        .checkout-btn:disabled { background: var(--text-light); cursor: not-allowed; transform: none; }
+        .checkout-btn svg { width: 24px; height: 24px; }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--primary-dark);
+            color: white;
+            padding: 14px 24px;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            z-index: 600;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--primary-dark);
+            color: white;
+            text-align: center;
+            padding: 10px 20px;
+            font-size: 13px;
+            z-index: 90;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            padding-bottom: 140px !important;
+        }
+
+        @media (max-width: 768px) {
+            .header-content { flex-wrap: wrap; gap: 12px; }
+            .lang-selector { order: 3; width: 100%; }
+            .lang-btn { width: 32px; height: 32px; }
+        }
+
+        @media (max-width: 640px) {
+            .brand-name { font-size: 1.1rem; }
+            .brand-logo { width: 40px; height: 40px; }
+            .products-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+            .product-info { padding: 14px; }
+            .product-name { font-size: 1rem; }
+            .price-main { font-size: 1.2rem; }
+            .section-title { font-size: 1.4rem; }
+            .cart-sidebar { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader"></div>
+        <p class="loading-text" id="loadingText">Cargando...</p>
+    </div>
+
+    <header>
+        <div class="header-content">
+            <div class="brand">
+                <img src="" alt="Logo" class="brand-logo" id="brandLogo">
+                <span class="brand-name" id="brandName">Cargando...</span>
+            </div>
+            
+            <div class="lang-selector" id="langSelector">
+                <button class="lang-btn" data-lang="pt-BR" title="Português"><img src="https://flagcdn.com/br.svg" alt="PT"></button>
+                <button class="lang-btn active" data-lang="es" title="Español"><img src="https://flagcdn.com/es.svg" alt="ES"></button>
+                <button class="lang-btn" data-lang="en" title="English"><img src="https://flagcdn.com/us.svg" alt="EN"></button>
+                <button class="lang-btn" data-lang="gn" title="Guaraní"><img src="https://flagcdn.com/py.svg" alt="GN"></button>
+                <button class="lang-btn" data-lang="ar" title="العربية"><img src="https://flagcdn.com/sa.svg" alt="AR"></button>
+                <button class="lang-btn" data-lang="zh-CN" title="中文"><img src="https://flagcdn.com/cn.svg" alt="ZH"></button>
+                <button class="lang-btn" data-lang="ko" title="한국어"><img src="https://flagcdn.com/kr.svg" alt="KO"></button>
+                <button class="lang-btn" data-lang="ja" title="日本語"><img src="https://flagcdn.com/jp.svg" alt="JA"></button>
+                <button class="lang-btn" data-lang="de" title="Deutsch"><img src="https://flagcdn.com/de.svg" alt="DE"></button>
+                <button class="lang-btn" data-lang="hi" title="हिन्दी"><img src="https://flagcdn.com/in.svg" alt="HI"></button>
+                <button class="lang-btn" data-lang="it" title="Italiano"><img src="https://flagcdn.com/it.svg" alt="IT"></button>
+                <button class="lang-btn" data-lang="ru" title="Русский"><img src="https://flagcdn.com/ru.svg" alt="RU"></button>
+                <button class="lang-btn" data-lang="fr" title="Français"><img src="https://flagcdn.com/fr.svg" alt="FR"></button>
+                <button class="lang-btn" data-lang="fa" title="فارسی"><img src="https://flagcdn.com/ir.svg" alt="FA"></button>
+            </div>
+
+            <button class="cart-btn" id="cartBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                <span class="cart-count empty" id="cartCount">0</span>
+            </button>
+        </div>
+    </header>
+
+    <main id="mainContent"></main>
+
+    <div class="cart-overlay" id="cartOverlay"></div>
+
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h2 class="cart-title" id="cartTitle">Mi Carrito</h2>
+            <button class="cart-close" id="cartClose">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <div class="cart-empty" id="cartEmpty">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                <p id="emptyCartText">Tu carrito está vacío</p>
+            </div>
+        </div>
+        <div class="cart-observations">
+            <label class="observations-label" id="observationsLabel" for="observations">Observaciones:</label>
+            <textarea class="observations-input" id="observations" placeholder="Ej: Sin cebolla..."></textarea>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-totals">
+                <div class="cart-total-main">
+                    <span>Total:</span>
+                    <span id="cartTotalMain">Gs. 0</span>
+                </div>
+                <div class="cart-total-secondary" id="cartTotalSecondary">R$ 0,00 | $ 0.00</div>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn" disabled>
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                <span id="checkoutText">Enviar Pedido</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <footer>
+        Produzido por: <a href="https://quetal.me" target="_blank">QueTal.me</a>
+    </footer>
+
+    <script>
+        // Ler parâmetros da URL
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Parâmetros obrigatórios
+        const PARAM_ID = urlParams.get('id');
+        const PARAM_CONFIG = urlParams.get('config');
+        const PARAM_INDEX = urlParams.get('index');
+        const PARAM_ES = urlParams.get('es');
+        const PARAM_GN = urlParams.get('gn');
+        const PARAM_PT = urlParams.get('pt-BR');
+        const PARAM_EN = urlParams.get('en');
+        const PARAM_ZH = urlParams.get('zh-CN');
+        const PARAM_AR = urlParams.get('ar');
+        const PARAM_KO = urlParams.get('ko');
+        const PARAM_JA = urlParams.get('ja');
+        const PARAM_DE = urlParams.get('de');
+        const PARAM_HI = urlParams.get('hi');
+        const PARAM_IT = urlParams.get('it');
+        const PARAM_RU = urlParams.get('ru');
+        const PARAM_FR = urlParams.get('fr');
+        const PARAM_FA = urlParams.get('fa');
+
+        // Verificar se todos os parâmetros foram fornecidos
+        const requiredParams = {
+            'id': PARAM_ID,
+            'config': PARAM_CONFIG,
+            'index': PARAM_INDEX,
+            'es': PARAM_ES,
+            'gn': PARAM_GN,
+            'pt-BR': PARAM_PT,
+            'en': PARAM_EN,
+            'zh-CN': PARAM_ZH,
+            'ar': PARAM_AR,
+            'ko': PARAM_KO,
+            'ja': PARAM_JA,
+            'de': PARAM_DE,
+            'hi': PARAM_HI,
+            'it': PARAM_IT,
+            'ru': PARAM_RU,
+            'fr': PARAM_FR,
+            'fa': PARAM_FA
+        };
+
+        const missingParams = Object.entries(requiredParams).filter(([k, v]) => !v).map(([k]) => k);
+
+        if (missingParams.length > 0) {
+            document.body.innerHTML = `
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;padding:20px;text-align:center;">
+                    <h1 style="color:#e53e3e;margin-bottom:20px;">⚠️ Configuração incompleta</h1>
+                    <p style="color:#666;max-width:500px;">Parâmetros faltando: <strong>${missingParams.join(', ')}</strong></p>
+                    <div style="margin-top:20px;font-size:13px;color:#999;background:#f5f5f5;padding:15px;border-radius:8px;font-family:monospace;text-align:left;max-width:100%;overflow-x:auto;">
+                        <p style="margin-bottom:10px;color:#333;font-weight:bold;">Formato da URL:</p>
+                        ecommerce.html?<br>
+                        &nbsp;&nbsp;id=ID_PLANILHA&<br>
+                        &nbsp;&nbsp;config=GID&<br>
+                        &nbsp;&nbsp;index=GID&<br>
+                        &nbsp;&nbsp;es=GID&<br>
+                        &nbsp;&nbsp;gn=GID&<br>
+                        &nbsp;&nbsp;pt-BR=GID&<br>
+                        &nbsp;&nbsp;en=GID&<br>
+                        &nbsp;&nbsp;zh-CN=GID&<br>
+                        &nbsp;&nbsp;ar=GID&<br>
+                        &nbsp;&nbsp;ko=GID&<br>
+                        &nbsp;&nbsp;ja=GID&<br>
+                        &nbsp;&nbsp;de=GID&<br>
+                        &nbsp;&nbsp;hi=GID&<br>
+                        &nbsp;&nbsp;it=GID&<br>
+                        &nbsp;&nbsp;ru=GID&<br>
+                        &nbsp;&nbsp;fr=GID&<br>
+                        &nbsp;&nbsp;fa=GID
+                    </div>
+                    <p style="margin-top:30px;font-size:13px;color:#999;">
+                        Produzido por: <a href="https://quetal.me" target="_blank" style="color:#2D5016;">QueTal.me</a>
+                    </p>
+                </div>
+            `;
+            throw new Error('Parâmetros faltando: ' + missingParams.join(', '));
+        }
+
+        const CONFIG = {
+            SPREADSHEET_ID: PARAM_ID,
+            GIDS: {
+                config: parseInt(PARAM_CONFIG),
+                index: parseInt(PARAM_INDEX),
+                es: parseInt(PARAM_ES),
+                gn: parseInt(PARAM_GN),
+                'pt-BR': parseInt(PARAM_PT),
+                en: parseInt(PARAM_EN),
+                'zh-CN': parseInt(PARAM_ZH),
+                ar: parseInt(PARAM_AR),
+                ko: parseInt(PARAM_KO),
+                ja: parseInt(PARAM_JA),
+                de: parseInt(PARAM_DE),
+                hi: parseInt(PARAM_HI),
+                it: parseInt(PARAM_IT),
+                ru: parseInt(PARAM_RU),
+                fr: parseInt(PARAM_FR),
+                fa: parseInt(PARAM_FA)
+            },
+            TRANSLATIONS: {
+                es: { loading: 'Cargando...', myCart: 'Mi Carrito', emptyCart: 'Tu carrito está vacío', observations: 'Observaciones:', sendOrder: 'Enviar Pedido', addToCart: 'Agregar', unavailable: 'Agotado', remove: 'Eliminar', added: '¡Agregado!', orderTitle: '¡Hola! Quiero pedir:', products: 'PRODUCTOS', obs: 'OBSERVACIONES', location: 'MI UBICACIÓN', thankYou: '¡Gracias!' },
+                'pt-BR': { loading: 'Carregando...', myCart: 'Meu Carrinho', emptyCart: 'Carrinho vazio', observations: 'Observações:', sendOrder: 'Enviar Pedido', addToCart: 'Adicionar', unavailable: 'Esgotado', remove: 'Remover', added: 'Adicionado!', orderTitle: 'Olá! Quero pedir:', products: 'PRODUTOS', obs: 'OBSERVAÇÕES', location: 'MINHA LOCALIZAÇÃO', thankYou: 'Obrigado!' },
+                en: { loading: 'Loading...', myCart: 'My Cart', emptyCart: 'Cart is empty', observations: 'Notes:', sendOrder: 'Send Order', addToCart: 'Add', unavailable: 'Sold Out', remove: 'Remove', added: 'Added!', orderTitle: 'Hello! I want to order:', products: 'PRODUCTS', obs: 'NOTES', location: 'MY LOCATION', thankYou: 'Thank you!' },
+                gn: { loading: 'Oñemyenyhẽhína...', myCart: 'Che Carrito', emptyCart: 'Carrito ndaipóri', observations: 'Ñe\'ẽ:', sendOrder: 'Emondo', addToCart: 'Embojuaju', unavailable: 'Ndaipóri', remove: 'Emboguete', added: '¡Oñembojuaju!', orderTitle: 'Mba\'éichapa! Aikuaa:', products: 'MBA\'E', obs: 'ÑE\'Ẽ', location: 'CHE RENDAITE', thankYou: '¡Aguyje!' },
+                'zh-CN': { loading: '加载中...', myCart: '购物车', emptyCart: '空的', observations: '备注:', sendOrder: '发送', addToCart: '添加', unavailable: '售罄', remove: '删除', added: '已添加!', orderTitle: '您好！我想订购:', products: '产品', obs: '备注', location: '位置', thankYou: '谢谢!' },
+                ar: { loading: 'جار التحميل...', myCart: 'السلة', emptyCart: 'فارغة', observations: 'ملاحظات:', sendOrder: 'إرسال', addToCart: 'إضافة', unavailable: 'نفذ', remove: 'حذف', added: 'تمت!', orderTitle: 'مرحباً! أريد:', products: 'المنتجات', obs: 'ملاحظات', location: 'موقعي', thankYou: 'شكراً!' },
+                ko: { loading: '로딩...', myCart: '장바구니', emptyCart: '비어있음', observations: '메모:', sendOrder: '주문', addToCart: '추가', unavailable: '품절', remove: '삭제', added: '추가됨!', orderTitle: '안녕하세요! 주문:', products: '상품', obs: '메모', location: '위치', thankYou: '감사!' },
+                ja: { loading: '読込中...', myCart: 'カート', emptyCart: '空です', observations: 'メモ:', sendOrder: '注文', addToCart: '追加', unavailable: '売切', remove: '削除', added: '追加!', orderTitle: 'こんにちは！注文:', products: '商品', obs: 'メモ', location: '場所', thankYou: 'ありがとう!' },
+                de: { loading: 'Laden...', myCart: 'Warenkorb', emptyCart: 'Leer', observations: 'Notizen:', sendOrder: 'Senden', addToCart: 'Hinzufügen', unavailable: 'Ausverkauft', remove: 'Entfernen', added: 'Hinzugefügt!', orderTitle: 'Hallo! Bestellung:', products: 'PRODUKTE', obs: 'NOTIZEN', location: 'STANDORT', thankYou: 'Danke!' },
+                hi: { loading: 'लोड हो रहा...', myCart: 'कार्ट', emptyCart: 'खाली', observations: 'नोट:', sendOrder: 'भेजें', addToCart: 'जोड़ें', unavailable: 'नहीं', remove: 'हटाएं', added: 'जोड़ा!', orderTitle: 'नमस्ते! ऑर्डर:', products: 'उत्पाद', obs: 'नोट', location: 'स्थान', thankYou: 'धन्यवाद!' },
+                it: { loading: 'Caricamento...', myCart: 'Carrello', emptyCart: 'Vuoto', observations: 'Note:', sendOrder: 'Invia', addToCart: 'Aggiungi', unavailable: 'Esaurito', remove: 'Rimuovi', added: 'Aggiunto!', orderTitle: 'Ciao! Ordine:', products: 'PRODOTTI', obs: 'NOTE', location: 'POSIZIONE', thankYou: 'Grazie!' },
+                ru: { loading: 'Загрузка...', myCart: 'Корзина', emptyCart: 'Пусто', observations: 'Заметки:', sendOrder: 'Отправить', addToCart: 'Добавить', unavailable: 'Нет', remove: 'Удалить', added: 'Добавлено!', orderTitle: 'Привет! Заказ:', products: 'ТОВАРЫ', obs: 'ЗАМЕТКИ', location: 'МЕСТО', thankYou: 'Спасибо!' },
+                fr: { loading: 'Chargement...', myCart: 'Panier', emptyCart: 'Vide', observations: 'Notes:', sendOrder: 'Envoyer', addToCart: 'Ajouter', unavailable: 'Épuisé', remove: 'Supprimer', added: 'Ajouté!', orderTitle: 'Bonjour! Commande:', products: 'PRODUITS', obs: 'NOTES', location: 'POSITION', thankYou: 'Merci!' },
+                fa: { loading: 'بارگذاری...', myCart: 'سبد', emptyCart: 'خالی', observations: 'یادداشت:', sendOrder: 'ارسال', addToCart: 'افزودن', unavailable: 'ناموجود', remove: 'حذف', added: 'اضافه شد!', orderTitle: 'سلام! سفارش:', products: 'محصولات', obs: 'یادداشت', location: 'موقعیت', thankYou: 'ممنون!' }
+            }
+        };
+
+        let state = { config: {}, products: [], translations: {}, cart: [], currentLang: 'es', whatsapp: '' };
+
+        function getCsvUrl(gid) {
+            return `https://docs.google.com/spreadsheets/d/${CONFIG.SPREADSHEET_ID}/export?format=csv&gid=${gid}`;
+        }
+
+        function parseCSV(text) {
+            const rows = [];
+            let row = [], cell = '', inQuotes = false;
+            for (let i = 0; i < text.length; i++) {
+                const c = text[i], n = text[i + 1];
+                if (inQuotes) {
+                    if (c === '"' && n === '"') { cell += '"'; i++; }
+                    else if (c === '"') inQuotes = false;
+                    else cell += c;
+                } else {
+                    if (c === '"') inQuotes = true;
+                    else if (c === ',') { row.push(cell.trim()); cell = ''; }
+                    else if (c === '\n' || (c === '\r' && n === '\n')) {
+                        row.push(cell.trim());
+                        if (row.some(x => x)) rows.push(row);
+                        row = []; cell = '';
+                        if (c === '\r') i++;
+                    } else if (c !== '\r') cell += c;
+                }
+            }
+            if (cell || row.length) { row.push(cell.trim()); if (row.some(x => x)) rows.push(row); }
+            return rows;
+        }
+
+        async function fetchCSV(gid) {
+            try {
+                const r = await fetch(getCsvUrl(gid));
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                return parseCSV(await r.text());
+            } catch (e) { console.error('Fetch error:', e); return []; }
+        }
+
+        function t(key) {
+            return CONFIG.TRANSLATIONS[state.currentLang]?.[key] || CONFIG.TRANSLATIONS.es[key] || key;
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        async function loadConfig() {
+            const data = await fetchCSV(CONFIG.GIDS.config);
+            const config = {};
+            data.forEach(row => {
+                if (row[0] && row[1]) {
+                    const key = row[0].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_');
+                    config[key] = row[1];
+                }
+            });
+            // Pegar nome da empresa do B2 (linha 2, coluna B)
+            if (data[1] && data[1][1]) {
+                config.nome_empresa = data[1][1];
+            }
+            // Pegar WhatsApp do B3 (linha 3, coluna B)
+            if (data[2] && data[2][1]) {
+                config.whatsapp_numero = data[2][1];
+            }
+            // Pegar idioma principal do B4 (linha 4, coluna B)
+            if (data[3] && data[3][1]) {
+                config.idioma_principal = data[3][1];
+            }
+            return config;
+        }
+
+        async function loadProducts() {
+            const data = await fetchCSV(CONFIG.GIDS.index);
+            return data.slice(1).filter(r => r[1]).map(r => ({
+                section: r[0] || '', id: r[1] || '', name: r[2] || '', description: r[3] || '',
+                status: r[4] || '', priceGuarani: r[5] || '', priceReal: r[6] || '', priceDolar: r[7] || '', image: r[8] || ''
+            }));
+        }
+
+        async function loadTranslations(lang) {
+            const gid = CONFIG.GIDS[lang];
+            if (gid === undefined) return [];
+            const data = await fetchCSV(gid);
+            return data.slice(1).filter(r => r[1]).map(r => ({
+                section: r[1] || '', name: r[2] || '', description: r[3] || '', status: r[4] || ''
+            }));
+        }
+
+        function updateUI() {
+            document.getElementById('loadingText').textContent = t('loading');
+            document.getElementById('cartTitle').textContent = t('myCart');
+            document.getElementById('emptyCartText').textContent = t('emptyCart');
+            document.getElementById('observationsLabel').textContent = t('observations');
+            document.getElementById('checkoutText').textContent = t('sendOrder');
+        }
+
+        function renderProducts() {
+            const main = document.getElementById('mainContent');
+            const trans = state.translations[state.currentLang] || [];
+            const sections = {};
+
+            state.products.forEach((p, i) => {
+                const tr = trans[i] || {};
+                const sec = tr.section || p.section || 'Otros';
+                if (!sections[sec]) sections[sec] = [];
+                sections[sec].push({ ...p, tName: tr.name || p.name, tDesc: tr.description || p.description, tStatus: tr.status || p.status });
+            });
+
+            main.innerHTML = Object.entries(sections).map(([name, prods]) => `
+                <section class="section">
+                    <h2 class="section-title">${name}</h2>
+                    <div class="products-grid">${prods.map(p => renderCard(p)).join('')}</div>
+                </section>
+            `).join('');
+
+            main.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+                btn.addEventListener('click', () => addToCart(btn.dataset.id));
+            });
+        }
+
+        function renderCard(p) {
+            const unavail = (p.tStatus || p.status || '').toLowerCase().match(/esgotado|agotado|sold out|unavailable/);
+            const hasImage = p.image && p.image.trim() !== '';
+            return `
+                <article class="product-card ${unavail ? 'unavailable' : ''}">
+                    ${hasImage ? `
+                    <div class="product-image-container">
+                        <img src="${p.image}" alt="${p.tName}" class="product-image" loading="lazy">
+                        ${unavail ? `<span class="product-status-badge">${t('unavailable')}</span>` : ''}
+                    </div>` : ''}
+                    <div class="product-info">
+                        <h3 class="product-name">${p.tName}</h3>
+                        <p class="product-description">${p.tDesc}</p>
+                        <div class="product-prices">
+                            <div class="price-main">${p.priceGuarani}</div>
+                            <div class="price-secondary">${p.priceReal} | ${p.priceDolar}</div>
+                        </div>
+                        <button class="add-to-cart-btn" data-id="${p.id}" ${unavail ? 'disabled' : ''}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            ${t('addToCart')}
+                        </button>
+                    </div>
+                </article>
+            `;
+        }
+
+        function addToCart(id) {
+            const item = state.cart.find(x => x.id === id);
+            if (item) item.qty++; else state.cart.push({ id, qty: 1 });
+            renderCart();
+            showToast(t('added'));
+        }
+
+        function updateQty(id, action) {
+            const item = state.cart.find(x => x.id === id);
+            if (!item) return;
+            if (action === 'increase') item.qty++;
+            else { item.qty--; if (item.qty <= 0) { state.cart = state.cart.filter(x => x.id !== id); } }
+            renderCart();
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cartItems');
+            const empty = document.getElementById('cartEmpty');
+            const count = document.getElementById('cartCount');
+            const btn = document.getElementById('checkoutBtn');
+            const trans = state.translations[state.currentLang] || [];
+            const total = state.cart.reduce((s, x) => s + x.qty, 0);
+
+            count.textContent = total;
+            count.classList.toggle('empty', total === 0);
+            btn.disabled = total === 0;
+
+            container.querySelectorAll('.cart-item').forEach(el => el.remove());
+
+            if (!state.cart.length) { empty.style.display = 'block'; updateTotals(); return; }
+            empty.style.display = 'none';
+
+            const placeholder = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80"%3E%3Crect fill="%23eee" width="80" height="80"/%3E%3C/svg%3E';
+
+            state.cart.forEach(item => {
+                const idx = state.products.findIndex(p => p.id === item.id);
+                const p = state.products[idx];
+                const tr = trans[idx] || {};
+                const name = tr.name || p?.name || '';
+
+                const html = `
+                    <div class="cart-item">
+                        <img src="${p?.image || placeholder}" alt="${name}" class="cart-item-image" onerror="this.src='${placeholder}'">
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${name}</div>
+                            <div class="cart-item-price">${p?.priceGuarani || ''}</div>
+                            <div class="cart-item-controls">
+                                <button class="qty-btn" data-action="decrease" data-id="${item.id}">−</button>
+                                <span class="cart-item-qty">${item.qty}</span>
+                                <button class="qty-btn" data-action="increase" data-id="${item.id}">+</button>
+                                <button class="remove-item" data-id="${item.id}">${t('remove')}</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                empty.insertAdjacentHTML('beforebegin', html);
+            });
+
+            container.querySelectorAll('.qty-btn').forEach(btn => {
+                btn.addEventListener('click', () => updateQty(btn.dataset.id, btn.dataset.action));
+            });
+            container.querySelectorAll('.remove-item').forEach(btn => {
+                btn.addEventListener('click', () => { state.cart = state.cart.filter(x => x.id !== btn.dataset.id); renderCart(); });
+            });
+
+            updateTotals();
+        }
+
+        function updateTotals() {
+            let tG = 0, tR = 0, tD = 0;
+            state.cart.forEach(item => {
+                const p = state.products.find(x => x.id === item.id);
+                if (p) {
+                    tG += (parseFloat(p.priceGuarani.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')) || 0) * item.qty;
+                    tR += (parseFloat(p.priceReal.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')) || 0) * item.qty;
+                    tD += (parseFloat(p.priceDolar.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0) * item.qty;
+                }
+            });
+            document.getElementById('cartTotalMain').textContent = `Gs. ${tG.toLocaleString('es-PY')}`;
+            document.getElementById('cartTotalSecondary').textContent = `R$ ${tR.toLocaleString('pt-BR', {minimumFractionDigits: 2})} | $ ${tD.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+        }
+
+        async function checkout() {
+            if (!state.cart.length) return;
+            const btn = document.getElementById('checkoutBtn');
+            btn.disabled = true;
+
+            let loc = '';
+            try {
+                const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { timeout: 10000 }));
+                loc = `https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
+            } catch (e) {}
+
+            // Idioma principal do vendedor (B4) e idioma do cliente
+            const idiomaVendedor = state.config.idioma_principal || 'es';
+            const idiomaCliente = state.currentLang;
+            
+            // Funções de tradução
+            const tv = (key) => CONFIG.TRANSLATIONS[idiomaVendedor]?.[key] || CONFIG.TRANSLATIONS.es[key] || key;
+            const tc = (key) => CONFIG.TRANSLATIONS[idiomaCliente]?.[key] || CONFIG.TRANSLATIONS.es[key] || key;
+            
+            // Nome do idioma do cliente
+            const nomesIdiomas = {
+                'es': 'Español', 'pt-BR': 'Português', 'en': 'English', 'gn': 'Guaraní',
+                'zh-CN': '中文', 'ar': 'العربية', 'ko': '한국어', 'ja': '日本語',
+                'de': 'Deutsch', 'hi': 'हिन्दी', 'it': 'Italiano', 'ru': 'Русский',
+                'fr': 'Français', 'fa': 'فارسی'
+            };
+            const nomeIdiomaCliente = nomesIdiomas[idiomaCliente] || idiomaCliente;
+
+            // Traduções dos produtos - vendedor e cliente
+            const transVendedor = state.translations[idiomaVendedor] || [];
+            const transCliente = state.translations[idiomaCliente] || [];
+            
+            // Montar mensagem bilíngue
+            let msg = `🌐 ${tv('clientLang') || 'Idioma del cliente'}: ${nomeIdiomaCliente}\n`;
+            msg += `${tv('orderTitle')} [${tc('orderTitle')}]\n\n`;
+            msg += `📦 ${tv('products')} [${tc('products')}]:\n`;
+            
+            let totalG = 0, totalR = 0, totalD = 0;
+
+            state.cart.forEach(item => {
+                const idx = state.products.findIndex(p => p.id === item.id);
+                const p = state.products[idx];
+                const trV = transVendedor[idx] || {};
+                const trC = transCliente[idx] || {};
+                const nameV = trV.name || p?.name || '';
+                const nameC = trC.name || p?.name || '';
+                
+                msg += `• ${item.qty}x ${nameV} [${nameC}]\n`;
+                msg += `  ${p?.priceGuarani} [${p?.priceReal} / ${p?.priceDolar}]\n`;
+                
+                totalG += (parseFloat(p?.priceGuarani.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')) || 0) * item.qty;
+                totalR += (parseFloat(p?.priceReal.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')) || 0) * item.qty;
+                totalD += (parseFloat(p?.priceDolar.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0) * item.qty;
+            });
+
+            const totalGStr = `Gs. ${totalG.toLocaleString('es-PY')}`;
+            const totalRStr = `R$ ${totalR.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            const totalDStr = `$ ${totalD.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            
+            msg += `\n💰 TOTAL: ${totalGStr} [${totalRStr} / ${totalDStr}]\n`;
+
+            const obs = document.getElementById('observations').value.trim();
+            if (obs) {
+                msg += `\n📝 ${tv('obs')}: [${tc('obs')}:]\n${obs}\n`;
+            }
+            
+            if (loc) {
+                msg += `\n📍 ${tv('location')}: [${tc('location')}:]\n${loc}\n`;
+            }
+            
+            msg += `\n${tv('thankYou')} [${tc('thankYou')}] 🙏`;
+
+            window.open(`https://wa.me/${state.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank');
+            btn.disabled = false;
+        }
+
+        async function changeLang(lang) {
+            if (lang === state.currentLang && state.translations[lang]) return;
+            state.currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+            updateUI();
+            if (!state.translations[lang]) {
+                document.getElementById('loadingScreen').classList.remove('hidden');
+                state.translations[lang] = await loadTranslations(lang);
+                document.getElementById('loadingScreen').classList.add('hidden');
+            }
+            renderProducts();
+            renderCart();
+            localStorage.setItem('lang', lang);
+        }
+
+        function setup() {
+            document.querySelectorAll('.lang-btn').forEach(b => b.addEventListener('click', () => changeLang(b.dataset.lang)));
+            document.getElementById('cartBtn').addEventListener('click', () => {
+                document.getElementById('cartSidebar').classList.add('show');
+                document.getElementById('cartOverlay').classList.add('show');
+            });
+            const close = () => {
+                document.getElementById('cartSidebar').classList.remove('show');
+                document.getElementById('cartOverlay').classList.remove('show');
+            };
+            document.getElementById('cartClose').addEventListener('click', close);
+            document.getElementById('cartOverlay').addEventListener('click', close);
+            document.getElementById('checkoutBtn').addEventListener('click', checkout);
+        }
+
+        async function init() {
+            setup();
+            const saved = localStorage.getItem('lang');
+            if (saved && CONFIG.GIDS[saved]) state.currentLang = saved;
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === state.currentLang));
+            updateUI();
+
+            const [config, products, translations] = await Promise.all([
+                loadConfig(),
+                loadProducts(),
+                loadTranslations(state.currentLang)
+            ]);
+
+            state.config = config;
+            state.products = products;
+            state.translations[state.currentLang] = translations;
+            state.whatsapp = (config.whatsapp_numero || config.whatsapp || '').replace(/\D/g, '');
+
+            // Carregar traduções do idioma do vendedor (B4) para o checkout
+            const idiomaVendedor = config.idioma_principal || 'es';
+            if (idiomaVendedor !== state.currentLang && !state.translations[idiomaVendedor]) {
+                state.translations[idiomaVendedor] = await loadTranslations(idiomaVendedor);
+            }
+
+            console.log('WhatsApp número:', state.whatsapp);
+            console.log('Idioma vendedor:', idiomaVendedor);
+
+            // Nome da empresa do B2 da Config
+            const brandName = config.nome_empresa || config.nome_da_empresa || 'Tienda';
+            document.getElementById('brandName').textContent = brandName;
+            document.title = brandName;
+
+            // Logo
+            if (config.url_imagem) {
+                const logo = document.getElementById('brandLogo');
+                logo.src = config.url_imagem;
+                logo.onload = () => logo.classList.add('loaded');
+            }
+
+            renderProducts();
+            renderCart();
+            document.getElementById('loadingScreen').classList.add('hidden');
+        }
+
+        init();
+    </script>
+</body>
+</html>
