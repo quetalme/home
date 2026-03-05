@@ -14,6 +14,9 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     .produto-excluir{opacity:0.5;background:#fef2f2!important}
     .produto-excluir input{text-decoration:line-through;color:#9ca3af}
+    .toggle-dia{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.2s}
+    .toggle-dia.ativo{background:#10b981;color:white}
+    .toggle-dia.inativo{background:#e5e7eb;color:#9ca3af}
   </style>
 </head>
 <body class="min-h-screen bg-gray-100">
@@ -42,6 +45,7 @@
   <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-xl shadow-lg hidden z-50"><span id="toastMsg"></span></div>
   <script>
 const WEBHOOK_URL='https://webhook.quetal.me/webhook/eProdutos';
+const DIAS=['Seg','Ter','Qua','Qui','Sex','Sab','Dom'];
 let token='',idPlanilha='',produtosOriginais=[],produtosAtuais=[],categorias=new Set(),temAlteracoes=false;
 
 document.addEventListener('DOMContentLoaded',()=>{
@@ -103,19 +107,45 @@ function renderizar(){
     h+='<div><label class="text-xs text-gray-400">Categoria</label><input type="text" list="cats" class="w-full border-b border-transparent focus:border-green-500 outline-none bg-transparent" value="'+(p.Sessao||'')+'" placeholder="Ex: Pizzas" data-f="Sessao" onchange="marcar('+i+');addCat(this.value)"></div>';
     h+='</div>';
     h+='<div class="mb-3"><input type="text" class="w-full text-sm text-gray-500 border-b border-transparent focus:border-green-500 outline-none bg-transparent" value="'+(p.Descricao||'')+'" placeholder="Descrição (opcional)" data-f="Descricao" onchange="marcar('+i+')"></div>';
-    h+='<div class="flex items-center justify-between">';
+    h+='<div class="flex items-center justify-between mb-3">';
     h+='<div class="flex gap-4 text-sm">';
     h+='<label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="st'+i+'" value="Disponível" '+(st?'checked':'')+' class="w-4 h-4" onchange="marcar('+i+')"><span>✅ Disponível</span></label>';
     h+='<label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="st'+i+'" value="Indisponível" '+(!st?'checked':'')+' class="w-4 h-4" onchange="marcar('+i+')"><span>❌ Indisponível</span></label>';
     h+='</div>';
     if(p._novo)h+='<span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">Novo</span>';
-    h+='</div></div>';
+    h+='</div>';
+    // Dias da semana
+    h+='<div class="flex items-center gap-1">';
+    h+='<span class="text-xs text-gray-400 mr-1">📅</span>';
+    DIAS.forEach(d=>{
+      const ativo=p[d]==='TRUE'||p[d]===true||p[d]===undefined;
+      h+='<div class="toggle-dia '+(ativo?'ativo':'inativo')+'" data-dia="'+d+'" data-idx="'+i+'" onclick="toggleDia(this)">'+d.substring(0,2)+'</div>';
+    });
+    h+='</div>';
+    h+='</div>';
   });
   c.innerHTML=h;
 }
 
+function toggleDia(el){
+  const idx=parseInt(el.dataset.idx);
+  const dia=el.dataset.dia;
+  const ativo=el.classList.contains('ativo');
+  if(ativo){
+    el.classList.remove('ativo');
+    el.classList.add('inativo');
+    produtosAtuais[idx][dia]='FALSE';
+  }else{
+    el.classList.remove('inativo');
+    el.classList.add('ativo');
+    produtosAtuais[idx][dia]='TRUE';
+  }
+  marcar(idx);
+}
+
 function adicionarProduto(){
-  produtosAtuais.push({ID_Produto:'P'+Date.now().toString(36).toUpperCase(),Nome_Produto:'',Preco_Guarani:'',Sessao:'',Descricao:'',Status:'Disponível',_novo:true});
+  const novo={ID_Produto:'P'+Date.now().toString(36).toUpperCase(),Nome_Produto:'',Preco_Guarani:'',Sessao:'',Descricao:'',Status:'Disponível',Seg:'TRUE',Ter:'TRUE',Qua:'TRUE',Qui:'TRUE',Sex:'TRUE',Sab:'TRUE',Dom:'TRUE',_novo:true};
+  produtosAtuais.push(novo);
   document.getElementById('vazio').classList.add('hidden');
   renderizar();marcarTem();
   setTimeout(()=>{const el=document.getElementById('p'+(produtosAtuais.length-1));el.scrollIntoView({behavior:'smooth',block:'center'});el.querySelector('input').focus();},100);
@@ -127,7 +157,7 @@ function marcarTem(){temAlteracoes=true;atualizarBarra();}
 function atualizarBarra(){const b=document.getElementById('barraAcoes'),ct=document.getElementById('contadorAlteracoes');if(temAlteracoes){b.classList.remove('hidden');ct.classList.remove('hidden');coletarDados();const n=produtosAtuais.filter(p=>p._excluir).length+produtosAtuais.filter(p=>p._novo&&!p._excluir).length+produtosAtuais.filter(p=>!p._novo&&!p._excluir&&alterado(p)).length;document.getElementById('numAlteracoes').textContent=n;}else{b.classList.add('hidden');ct.classList.add('hidden');}}
 function descartarAlteracoes(){if(confirm('Descartar todas as alterações?')){produtosAtuais=JSON.parse(JSON.stringify(produtosOriginais));temAlteracoes=false;atualizarBarra();renderizar();mostrarToast('↩️ Descartado');}}
 function coletarDados(){produtosAtuais.forEach((p,i)=>{const el=document.getElementById('p'+i);if(!el)return;['Nome_Produto','Preco_Guarani','Sessao','Descricao'].forEach(f=>{const inp=el.querySelector('[data-f="'+f+'"]');if(inp)p[f]=f==='Preco_Guarani'?inp.value.replace(/\D/g,''):inp.value;});const st=el.querySelector('input[name="st'+i+'"]:checked');if(st)p.Status=st.value;});}
-function alterado(p){const o=produtosOriginais.find(x=>x.ID_Produto===p.ID_Produto);if(!o)return true;return p.Nome_Produto!==o.Nome_Produto||p.Preco_Guarani!==o.Preco_Guarani||p.Sessao!==o.Sessao||p.Descricao!==o.Descricao||p.Status!==o.Status;}
+function alterado(p){const o=produtosOriginais.find(x=>x.ID_Produto===p.ID_Produto);if(!o)return true;return p.Nome_Produto!==o.Nome_Produto||p.Preco_Guarani!==o.Preco_Guarani||p.Sessao!==o.Sessao||p.Descricao!==o.Descricao||p.Status!==o.Status||p.Seg!==o.Seg||p.Ter!==o.Ter||p.Qua!==o.Qua||p.Qui!==o.Qui||p.Sex!==o.Sex||p.Sab!==o.Sab||p.Dom!==o.Dom;}
 function fmt(n){return Number(n||0).toLocaleString('es-PY');}
 function fmtI(i){let v=i.value.replace(/\D/g,'');i.value=v?Number(v).toLocaleString('es-PY'):'';}
 function addCat(c){if(c&&!categorias.has(c)){categorias.add(c);document.getElementById('cats').innerHTML=Array.from(categorias).map(x=>'<option value="'+x+'">').join('');}}
