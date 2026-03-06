@@ -48,6 +48,11 @@ const WEBHOOK_URL='https://webhook.quetal.me/webhook/eProdutos';
 const DIAS=['Seg','Ter','Qua','Qui','Sex','Sab','Dom'];
 let token='',idPlanilha='',produtosOriginais=[],produtosAtuais=[],categorias=new Set(),temAlteracoes=false;
 
+// Função auxiliar para verificar se dia está ativo
+function diaAtivo(valor){
+  return valor === '✔' || valor === '✓' || valor === 'TRUE' || valor === true || valor === undefined;
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   token=new URLSearchParams(location.search).get('token')||'';
   if(!token){mostrarErro('Link inválido. Envie /produtos no WhatsApp.');return;}
@@ -118,7 +123,7 @@ function renderizar(){
     h+='<div class="flex items-center gap-1">';
     h+='<span class="text-xs text-gray-400 mr-1">📅</span>';
     DIAS.forEach(d=>{
-      const ativo=p[d]==='TRUE'||p[d]===true||p[d]===undefined;
+      const ativo=diaAtivo(p[d]);
       h+='<div class="toggle-dia '+(ativo?'ativo':'inativo')+'" data-dia="'+d+'" data-idx="'+i+'" onclick="toggleDia(this)">'+d.substring(0,2)+'</div>';
     });
     h+='</div>';
@@ -154,10 +159,63 @@ function adicionarProduto(){
 function toggleExc(i){produtosAtuais[i]._excluir=!produtosAtuais[i]._excluir;document.getElementById('p'+i).classList.toggle('produto-excluir',produtosAtuais[i]._excluir);marcarTem();}
 function marcar(i){if(!produtosAtuais[i]._novo)produtosAtuais[i]._alterado=true;marcarTem();}
 function marcarTem(){temAlteracoes=true;atualizarBarra();}
-function atualizarBarra(){const b=document.getElementById('barraAcoes'),ct=document.getElementById('contadorAlteracoes');if(temAlteracoes){b.classList.remove('hidden');ct.classList.remove('hidden');coletarDados();const n=produtosAtuais.filter(p=>p._excluir).length+produtosAtuais.filter(p=>p._novo&&!p._excluir).length+produtosAtuais.filter(p=>!p._novo&&!p._excluir&&alterado(p)).length;document.getElementById('numAlteracoes').textContent=n;}else{b.classList.add('hidden');ct.classList.add('hidden');}}
-function descartarAlteracoes(){if(confirm('Descartar todas as alterações?')){produtosAtuais=JSON.parse(JSON.stringify(produtosOriginais));temAlteracoes=false;atualizarBarra();renderizar();mostrarToast('↩️ Descartado');}}
-function coletarDados(){produtosAtuais.forEach((p,i)=>{const el=document.getElementById('p'+i);if(!el)return;['Nome_Produto','Preco_Guarani','Sessao','Descricao'].forEach(f=>{const inp=el.querySelector('[data-f="'+f+'"]');if(inp)p[f]=f==='Preco_Guarani'?inp.value.replace(/\D/g,''):inp.value;});const st=el.querySelector('input[name="st'+i+'"]:checked');if(st)p.Status=st.value;});}
-function alterado(p){const o=produtosOriginais.find(x=>x.ID_Produto===p.ID_Produto);if(!o)return true;return p.Nome_Produto!==o.Nome_Produto||p.Preco_Guarani!==o.Preco_Guarani||p.Sessao!==o.Sessao||p.Descricao!==o.Descricao||p.Status!==o.Status||p.Seg!==o.Seg||p.Ter!==o.Ter||p.Qua!==o.Qua||p.Qui!==o.Qui||p.Sex!==o.Sex||p.Sab!==o.Sab||p.Dom!==o.Dom;}
+
+function atualizarBarra(){
+  const b=document.getElementById('barraAcoes'),ct=document.getElementById('contadorAlteracoes');
+  if(temAlteracoes){
+    b.classList.remove('hidden');
+    ct.classList.remove('hidden');
+    coletarDados();
+    const n=produtosAtuais.filter(p=>p._excluir).length+produtosAtuais.filter(p=>p._novo&&!p._excluir).length+produtosAtuais.filter(p=>!p._novo&&!p._excluir&&alterado(p)).length;
+    document.getElementById('numAlteracoes').textContent=n;
+  }else{
+    b.classList.add('hidden');
+    ct.classList.add('hidden');
+  }
+}
+
+function descartarAlteracoes(){
+  if(confirm('Descartar todas as alterações?')){
+    produtosAtuais=JSON.parse(JSON.stringify(produtosOriginais));
+    temAlteracoes=false;
+    atualizarBarra();
+    renderizar();
+    mostrarToast('↩️ Descartado');
+  }
+}
+
+function coletarDados(){
+  produtosAtuais.forEach((p,i)=>{
+    const el=document.getElementById('p'+i);
+    if(!el)return;
+    ['Nome_Produto','Preco_Guarani','Sessao','Descricao'].forEach(f=>{
+      const inp=el.querySelector('[data-f="'+f+'"]');
+      if(inp)p[f]=f==='Preco_Guarani'?inp.value.replace(/\D/g,''):inp.value;
+    });
+    const st=el.querySelector('input[name="st'+i+'"]:checked');
+    if(st)p.Status=st.value;
+  });
+}
+
+function alterado(p){
+  const o=produtosOriginais.find(x=>x.ID_Produto===p.ID_Produto);
+  if(!o)return true;
+  
+  // Comparar campos básicos
+  if(p.Nome_Produto!==o.Nome_Produto)return true;
+  if(p.Preco_Guarani!==o.Preco_Guarani)return true;
+  if(p.Sessao!==o.Sessao)return true;
+  if(p.Descricao!==o.Descricao)return true;
+  if(p.Status!==o.Status)return true;
+  
+  // Comparar dias (considerando ✔, TRUE, etc)
+  for(const d of DIAS){
+    if(diaAtivo(p[d])!==diaAtivo(o[d]))return true;
+  }
+  
+  return false;
+}
+
 function fmt(n){return Number(n||0).toLocaleString('es-PY');}
 function fmtI(i){let v=i.value.replace(/\D/g,'');i.value=v?Number(v).toLocaleString('es-PY'):'';}
 function addCat(c){if(c&&!categorias.has(c)){categorias.add(c);document.getElementById('cats').innerHTML=Array.from(categorias).map(x=>'<option value="'+x+'">').join('');}}
