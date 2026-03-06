@@ -83,12 +83,23 @@ async function salvarTudo(){
   btn.disabled=true;
   document.getElementById('btnSalvarText').textContent='Salvando...';
   coletarDados();
-  const exc=produtosAtuais.filter(p=>p._excluir&&p.row_number);
+  
+  // Produtos novos (não marcados pra excluir)
   const cri=produtosAtuais.filter(p=>p._novo&&!p._excluir);
-  const atu=produtosAtuais.filter(p=>!p._novo&&!p._excluir&&alterado(p));
+  
+  // Produtos existentes: alterados OU marcados pra excluir
+  const atu=produtosAtuais.filter(p=>!p._novo&&(p._excluir||alterado(p)));
+  
   try{
-    const r=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({acao:'salvarTudo',token,idPlanilha,excluir:exc.map(p=>({ID_Produto:p.ID_Produto,row_number:p.row_number})),criar:cri,atualizar:atu})});
-    if(r.ok){mostrarToast('✅ '+cri.length+' criados, '+atu.length+' atualizados, '+exc.length+' excluídos');temAlteracoes=false;atualizarBarra();carregarProdutos();}
+    const r=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({acao:'salvarTudo',token,idPlanilha,criar:cri,atualizar:atu})});
+    if(r.ok){
+      const excluidos=atu.filter(p=>p._excluir).length;
+      const atualizados=atu.filter(p=>!p._excluir).length;
+      mostrarToast('✅ '+cri.length+' criados, '+atualizados+' atualizados, '+excluidos+' excluídos');
+      temAlteracoes=false;
+      atualizarBarra();
+      carregarProdutos();
+    }
   }catch(e){mostrarToast('❌ Erro');}
   btn.disabled=false;
   document.getElementById('btnSalvarText').textContent='💾 Salvar';
@@ -156,9 +167,21 @@ function adicionarProduto(){
   setTimeout(()=>{const el=document.getElementById('p'+(produtosAtuais.length-1));el.scrollIntoView({behavior:'smooth',block:'center'});el.querySelector('input').focus();},100);
 }
 
-function toggleExc(i){produtosAtuais[i]._excluir=!produtosAtuais[i]._excluir;document.getElementById('p'+i).classList.toggle('produto-excluir',produtosAtuais[i]._excluir);marcarTem();}
-function marcar(i){if(!produtosAtuais[i]._novo)produtosAtuais[i]._alterado=true;marcarTem();}
-function marcarTem(){temAlteracoes=true;atualizarBarra();}
+function toggleExc(i){
+  produtosAtuais[i]._excluir=!produtosAtuais[i]._excluir;
+  document.getElementById('p'+i).classList.toggle('produto-excluir',produtosAtuais[i]._excluir);
+  marcarTem();
+}
+
+function marcar(i){
+  if(!produtosAtuais[i]._novo)produtosAtuais[i]._alterado=true;
+  marcarTem();
+}
+
+function marcarTem(){
+  temAlteracoes=true;
+  atualizarBarra();
+}
 
 function atualizarBarra(){
   const b=document.getElementById('barraAcoes'),ct=document.getElementById('contadorAlteracoes');
@@ -166,8 +189,10 @@ function atualizarBarra(){
     b.classList.remove('hidden');
     ct.classList.remove('hidden');
     coletarDados();
-    const n=produtosAtuais.filter(p=>p._excluir).length+produtosAtuais.filter(p=>p._novo&&!p._excluir).length+produtosAtuais.filter(p=>!p._novo&&!p._excluir&&alterado(p)).length;
-    document.getElementById('numAlteracoes').textContent=n;
+    const excluidos=produtosAtuais.filter(p=>p._excluir).length;
+    const novos=produtosAtuais.filter(p=>p._novo&&!p._excluir).length;
+    const alterados=produtosAtuais.filter(p=>!p._novo&&!p._excluir&&alterado(p)).length;
+    document.getElementById('numAlteracoes').textContent=excluidos+novos+alterados;
   }else{
     b.classList.add('hidden');
     ct.classList.add('hidden');
@@ -208,7 +233,7 @@ function alterado(p){
   if(p.Descricao!==o.Descricao)return true;
   if(p.Status!==o.Status)return true;
   
-  // Comparar dias (considerando ✔, TRUE, etc)
+  // Comparar dias
   for(const d of DIAS){
     if(diaAtivo(p[d])!==diaAtivo(o[d]))return true;
   }
