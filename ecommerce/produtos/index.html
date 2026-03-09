@@ -53,7 +53,8 @@
   <input type="file" id="inputImagem" accept="image/*" class="hidden" onchange="imagemSelecionada(event)">
   
   <script>
-const WEBHOOK_URL='https://webhook.quetal.me/webhook/Produtos';
+    //const WEBHOOK_URL='https://webhook.quetal.me/webhook/Produtos';
+    const WEBHOOK_URL='https://n8n.quetal.me/webhook-test/Produtos';
 const DIAS=['Seg','Ter','Qua','Qui','Sex','Sab','Dom'];
 let token='',idPlanilha='',produtosOriginais=[],produtosAtuais=[],categorias=new Set(),temAlteracoes=false;
 let produtoUploadAtual = -1; // Índice do produto que está fazendo upload
