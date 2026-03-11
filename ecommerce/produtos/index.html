@@ -53,13 +53,11 @@
   <input type="file" id="inputImagem" accept="image/*" class="hidden" onchange="imagemSelecionada(event)">
   
   <script>
-    const WEBHOOK_URL='https://webhook.quetal.me/webhook/produtos';
-    //const WEBHOOK_URL='https://n8n.quetal.me/webhook-test/Produtos';
+const WEBHOOK_URL='https://webhook.quetal.me/webhook/eProdutos';
 const DIAS=['Seg','Ter','Qua','Qui','Sex','Sab','Dom'];
 let token='',idPlanilha='',produtosOriginais=[],produtosAtuais=[],categorias=new Set(),temAlteracoes=false;
-let produtoUploadAtual = -1; // Índice do produto que está fazendo upload
+let produtoUploadAtual = -1;
 
-// Função auxiliar para verificar se dia está ativo
 function diaAtivo(valor){
   return valor === '✔' || valor === '✓' || valor === 'TRUE' || valor === true || valor === undefined;
 }
@@ -95,10 +93,7 @@ async function salvarTudo(){
   document.getElementById('btnSalvarText').textContent='Salvando...';
   coletarDados();
   
-  // Produtos novos (não marcados pra excluir)
   const cri=produtosAtuais.filter(p=>p._novo&&!p._excluir);
-  
-  // Produtos existentes: alterados OU marcados pra excluir
   const atu=produtosAtuais.filter(p=>!p._novo&&(p._excluir||alterado(p)));
   
   try{
@@ -129,10 +124,8 @@ function renderizar(){
     
     h+='<div id="p'+i+'" class="bg-white rounded-xl p-4 card-shadow '+ex+'">';
     
-    // Linha superior: Imagem + Nome + Lixeira
     h+='<div class="flex items-start gap-3 mb-3">';
     
-    // Área da imagem
     h+='<div class="img-container" id="imgContainer'+i+'">';
     if(temImagem){
       h+='<img src="'+imgSrc+'" class="img-preview" onclick="abrirUpload('+i+')">';
@@ -142,23 +135,18 @@ function renderizar(){
     }
     h+='</div>';
     
-    // Nome do produto
     h+='<input type="text" class="flex-1 font-semibold text-lg border-b border-transparent focus:border-green-500 outline-none bg-transparent" value="'+(p.Nome_Produto||'')+'" placeholder="Nome do produto" data-f="Nome_Produto" onchange="marcar('+i+')">';
     
-    // Botão excluir
     h+='<button onclick="toggleExc('+i+')" class="p-2 rounded-lg '+(p._excluir?'bg-red-100 text-red-500':'text-gray-400 hover:text-red-500')+'" title="'+(p._excluir?'Restaurar':'Excluir')+'">🗑️</button>';
     h+='</div>';
     
-    // Preço e Categoria
     h+='<div class="grid grid-cols-2 gap-3 mb-3">';
     h+='<div><label class="text-xs text-gray-400">Preço (Gs.)</label><input type="text" class="w-full font-medium text-green-600 border-b border-transparent focus:border-green-500 outline-none bg-transparent" value="'+fmt(p.Preco_Guarani)+'" data-f="Preco_Guarani" oninput="fmtI(this)" onchange="marcar('+i+')"></div>';
     h+='<div><label class="text-xs text-gray-400">Categoria</label><input type="text" list="cats" class="w-full border-b border-transparent focus:border-green-500 outline-none bg-transparent" value="'+(p.Sessao||'')+'" placeholder="Ex: Pizzas" data-f="Sessao" onchange="marcar('+i+');addCat(this.value)"></div>';
     h+='</div>';
     
-    // Descrição
     h+='<div class="mb-3"><input type="text" class="w-full text-sm text-gray-500 border-b border-transparent focus:border-green-500 outline-none bg-transparent" value="'+(p.Descricao||'')+'" placeholder="Descrição (opcional)" data-f="Descricao" onchange="marcar('+i+')"></div>';
     
-    // Status
     h+='<div class="flex items-center justify-between mb-3">';
     h+='<div class="flex gap-4 text-sm">';
     h+='<label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="st'+i+'" value="Disponível" '+(st?'checked':'')+' class="w-4 h-4" onchange="marcar('+i+')"><span>✅ Disponível</span></label>';
@@ -167,7 +155,6 @@ function renderizar(){
     if(p._novo)h+='<span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">Novo</span>';
     h+='</div>';
     
-    // Dias da semana
     h+='<div class="flex items-center gap-1">';
     h+='<span class="text-xs text-gray-400 mr-1">📅</span>';
     DIAS.forEach(d=>{
@@ -181,8 +168,6 @@ function renderizar(){
   c.innerHTML=h;
 }
 
-// ========== FUNÇÕES DE IMAGEM ==========
-
 function abrirUpload(idx){
   produtoUploadAtual = idx;
   document.getElementById('inputImagem').click();
@@ -192,13 +177,11 @@ function imagemSelecionada(event){
   const file = event.target.files[0];
   if(!file) return;
   
-  // Validar tamanho (max 5MB)
   if(file.size > 5 * 1024 * 1024){
     mostrarToast('❌ Imagem muito grande (máx 5MB)');
     return;
   }
   
-  // Validar tipo
   if(!file.type.startsWith('image/')){
     mostrarToast('❌ Arquivo deve ser uma imagem');
     return;
@@ -209,19 +192,16 @@ function imagemSelecionada(event){
     const base64 = e.target.result;
     const idx = produtoUploadAtual;
     
-    // Salvar no produto
     produtosAtuais[idx]._imagemBase64 = base64;
     produtosAtuais[idx]._imagemPreview = base64;
     produtosAtuais[idx]._imagemNome = file.name;
     produtosAtuais[idx]._imagemAlterada = true;
     
-    // Atualizar preview
     atualizarPreviewImagem(idx);
     marcar(idx);
   };
   reader.readAsDataURL(file);
   
-  // Limpar input para permitir selecionar mesma imagem novamente
   event.target.value = '';
 }
 
@@ -249,8 +229,6 @@ function removerImagem(idx){
   atualizarPreviewImagem(idx);
   marcar(idx);
 }
-
-// ========== FUNÇÕES EXISTENTES ==========
 
 function toggleDia(el){
   const idx=parseInt(el.dataset.idx);
@@ -335,17 +313,13 @@ function alterado(p){
   const o=produtosOriginais.find(x=>x.ID_Produto===p.ID_Produto);
   if(!o)return true;
   
-  // Comparar campos básicos
   if(p.Nome_Produto!==o.Nome_Produto)return true;
   if(p.Preco_Guarani!==o.Preco_Guarani)return true;
   if(p.Sessao!==o.Sessao)return true;
   if(p.Descricao!==o.Descricao)return true;
   if(p.Status!==o.Status)return true;
-  
-  // Comparar imagem
   if(p._imagemAlterada || p._imagemRemovida)return true;
   
-  // Comparar dias
   for(const d of DIAS){
     if(diaAtivo(p[d])!==diaAtivo(o[d]))return true;
   }
