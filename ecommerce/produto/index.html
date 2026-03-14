@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Produto - QueTal.me</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    *{font-family:'Inter',sans-serif}
+    .gradient-bg{background:linear-gradient(135deg,#10b981 0%,#059669 100%)}
+    .card-shadow{box-shadow:0 4px 15px -3px rgba(0,0,0,0.1)}
+    .btn-green{background:linear-gradient(135deg,#10b981 0%,#059669 100%)}
+    .btn-red{background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%)}
+    .spinner{animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .toggle-dia{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;font-weight:600;transition:all 0.2s}
+    .toggle-dia.ativo{background:#10b981;color:white}
+    .toggle-dia.inativo{background:#e5e7eb;color:#9ca3af}
+    .img-preview{width:100%;max-width:200px;height:200px;object-fit:cover;border-radius:12px;border:2px solid #e5e7eb}
+    .img-upload-btn{width:100%;max-width:200px;height:200px;border-radius:12px;border:2px dashed #d1d5db;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;background:#f9fafb;gap:8px}
+    .img-upload-btn:hover{border-color:#10b981;background:#ecfdf5}
+    .img-container{position:relative;display:flex;justify-content:center}
+    .img-remove{position:absolute;top:4px;right:calc(50% - 100px + 4px);width:28px;height:28px;background:#ef4444;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;font-weight:bold}
+    select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:16px}
+  </style>
+</head>
+<body class="min-h-screen bg-gray-100">
+  <header class="gradient-bg text-white py-4 px-4 shadow-lg sticky top-0 z-40">
+    <div class="max-w-lg mx-auto flex items-center gap-3">
+      <span class="text-2xl">📦</span>
+      <div><h1 class="font-bold text-lg">Produto</h1><p class="text-sm text-green-100" id="nomeEmpresa">Carregando...</p></div>
+    </div>
+  </header>
+  
+  <main class="max-w-lg mx-auto p-4 pb-32">
+    <!-- Loading -->
+    <div id="loading" class="text-center py-12">
+      <div class="inline-block w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full spinner"></div>
+      <p class="text-gray-500 mt-2">Carregando...</p>
+    </div>
+    
+    <!-- Conteúdo principal -->
+    <div id="conteudo" class="hidden">
+      <!-- Seletor de produto -->
+      <div class="bg-white rounded-xl p-4 card-shadow mb-4">
+        <label class="text-sm text-gray-500 mb-2 block">Selecionar produto:</label>
+        <select id="selectProduto" onchange="selecionarProduto()" class="w-full p-3 border border-gray-300 rounded-xl text-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none cursor-pointer pr-10">
+          <option value="">-- Selecione --</option>
+        </select>
+        <button onclick="novoProduto()" class="w-full mt-3 py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-green-500 hover:text-green-500 flex items-center justify-center gap-2">
+          ➕ Novo Produto
+        </button>
+      </div>
+      
+      <!-- Card do produto -->
+      <div id="cardProduto" class="hidden">
+        <div class="bg-white rounded-xl p-4 card-shadow">
+          <!-- Imagem centralizada -->
+          <div class="img-container mb-4" id="imgContainer">
+            <div class="img-upload-btn" onclick="abrirUpload()">
+              <span class="text-4xl text-gray-400">📷</span>
+              <span class="text-sm text-gray-400">Adicionar foto</span>
+            </div>
+          </div>
+          
+          <!-- Nome -->
+          <div class="mb-4">
+            <label class="text-xs text-gray-400 mb-1 block">Nome do produto</label>
+            <input type="text" id="nomeProduto" class="w-full text-xl font-semibold border-b-2 border-gray-200 focus:border-green-500 outline-none bg-transparent py-2" placeholder="Ex: Pizza Margherita">
+          </div>
+          
+          <!-- Preço e Categoria -->
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="text-xs text-gray-400 mb-1 block">Preço (Gs.)</label>
+              <input type="text" id="precoProduto" class="w-full text-lg font-medium text-green-600 border-b-2 border-gray-200 focus:border-green-500 outline-none bg-transparent py-2" placeholder="0" oninput="formatarPreco(this)">
+            </div>
+            <div>
+              <label class="text-xs text-gray-400 mb-1 block">Categoria</label>
+              <input type="text" id="categoriaProduto" list="cats" class="w-full text-lg border-b-2 border-gray-200 focus:border-green-500 outline-none bg-transparent py-2" placeholder="Ex: Pizzas">
+              <datalist id="cats"></datalist>
+            </div>
+          </div>
+          
+          <!-- Descrição -->
+          <div class="mb-4">
+            <label class="text-xs text-gray-400 mb-1 block">Descrição</label>
+            <textarea id="descricaoProduto" rows="2" class="w-full text-gray-600 border-b-2 border-gray-200 focus:border-green-500 outline-none bg-transparent py-2 resize-none" placeholder="Descrição do produto (opcional)"></textarea>
+          </div>
+          
+          <!-- Status -->
+          <div class="mb-4">
+            <label class="text-xs text-gray-400 mb-2 block">Status</label>
+            <div class="flex gap-4">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="status" value="Disponível" checked class="w-5 h-5 accent-green-500">
+                <span>✅ Disponível</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="status" value="Indisponível" class="w-5 h-5 accent-green-500">
+                <span>❌ Indisponível</span>
+              </label>
+            </div>
+          </div>
+          
+          <!-- Dias da semana -->
+          <div>
+            <label class="text-xs text-gray-400 mb-2 block">📅 Disponível nos dias:</label>
+            <div class="flex items-center justify-between gap-1" id="diasContainer">
+              <div class="toggle-dia ativo" data-dia="Seg" onclick="toggleDia(this)">Seg</div>
+              <div class="toggle-dia ativo" data-dia="Ter" onclick="toggleDia(this)">Ter</div>
+              <div class="toggle-dia ativo" data-dia="Qua" onclick="toggleDia(this)">Qua</div>
+              <div class="toggle-dia ativo" data-dia="Qui" onclick="toggleDia(this)">Qui</div>
+              <div class="toggle-dia ativo" data-dia="Sex" onclick="toggleDia(this)">Sex</div>
+              <div class="toggle-dia ativo" data-dia="Sab" onclick="toggleDia(this)">Sab</div>
+              <div class="toggle-dia ativo" data-dia="Dom" onclick="toggleDia(this)">Dom</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Botões de ação -->
+        <div class="flex gap-3 mt-4">
+          <button onclick="salvarProduto()" id="btnSalvar" class="flex-1 py-4 btn-green text-white rounded-xl font-semibold flex items-center justify-center gap-2">
+            <span id="btnSalvarText">💾 Salvar</span>
+          </button>
+          <button onclick="excluirProduto()" id="btnExcluir" class="py-4 px-6 btn-red text-white rounded-xl font-semibold hidden">
+            🗑️
+          </button>
+        </div>
+      </div>
+      
+      <!-- Estado vazio -->
+      <div id="vazio" class="text-center py-8">
+        <span class="text-5xl">👆</span>
+        <p class="text-gray-500 mt-4">Selecione um produto acima<br>ou crie um novo</p>
+      </div>
+    </div>
+    
+    <!-- Erro -->
+    <div id="erro" class="hidden text-center py-12">
+      <span class="text-6xl">⚠️</span>
+      <p class="text-red-500 mt-4" id="erroMsg">Erro</p>
+    </div>
+  </main>
+  
+  <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-xl shadow-lg hidden z-50">
+    <span id="toastMsg"></span>
+  </div>
+  
+  <input type="file" id="inputImagem" accept="image/*" class="hidden" onchange="imagemSelecionada(event)">
+  
+  <script>
+const WEBHOOK_URL='https://webhook.quetal.me/webhook/eProdutos';
+const DIAS=['Seg','Ter','Qua','Qui','Sex','Sab','Dom'];
+
+let token='', idPlanilha='', produtos=[], categorias=new Set();
+let produtoAtual=null, isNovo=false, alterado=false;
+let imagemBase64=null, imagemRemovida=false;
+
+function diaAtivo(valor){
+  return valor === '✔' || valor === '✓' || valor === 'TRUE' || valor === true || valor === undefined;
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  token=new URLSearchParams(location.search).get('token')||'';
+  if(!token){mostrarErro('Link inválido. Envie /produto no WhatsApp.');return;}
+  carregarProdutos();
+});
+
+async function carregarProdutos(){
+  try{
+    const r=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({acao:'listar',token})});
+    const d=await r.json();
+    if(d.success){
+      idPlanilha=d.idPlanilha;
+      produtos=d.produtos||[];
+      document.getElementById('nomeEmpresa').textContent=d.nomeEmpresa||'Loja';
+      
+      // Preencher categorias
+      produtos.forEach(p=>{if(p.Sessao)categorias.add(p.Sessao);});
+      document.getElementById('cats').innerHTML=Array.from(categorias).map(x=>'<option value="'+x+'">').join('');
+      
+      // Preencher combobox
+      const select=document.getElementById('selectProduto');
+      select.innerHTML='<option value="">-- Selecione --</option>'+
+        produtos.map(p=>'<option value="'+p.ID_Produto+'">'+p.Nome_Produto+'</option>').join('');
+      
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('conteudo').classList.remove('hidden');
+    }else{mostrarErro(d.message||'Erro');}
+  }catch(e){mostrarErro('Erro de conexão');}
+}
+
+function selecionarProduto(){
+  const id=document.getElementById('selectProduto').value;
+  if(!id){
+    document.getElementById('cardProduto').classList.add('hidden');
+    document.getElementById('vazio').classList.remove('hidden');
+    produtoAtual=null;
+    return;
+  }
+  
+  produtoAtual=produtos.find(p=>p.ID_Produto===id);
+  if(!produtoAtual)return;
+  
+  isNovo=false;
+  alterado=false;
+  imagemBase64=null;
+  imagemRemovida=false;
+  
+  preencherCard(produtoAtual);
+  
+  document.getElementById('vazio').classList.add('hidden');
+  document.getElementById('cardProduto').classList.remove('hidden');
+  document.getElementById('btnExcluir').classList.remove('hidden');
+}
+
+function novoProduto(){
+  produtoAtual={
+    ID_Produto:'P'+Date.now().toString(36).toUpperCase(),
+    Nome_Produto:'',
+    Preco_Guarani:'',
+    Sessao:'',
+    Descricao:'',
+    Status:'Disponível',
+    Seg:'TRUE',Ter:'TRUE',Qua:'TRUE',Qui:'TRUE',Sex:'TRUE',Sab:'TRUE',Dom:'TRUE',
+    Imagens:''
+  };
+  
+  isNovo=true;
+  alterado=true;
+  imagemBase64=null;
+  imagemRemovida=false;
+  
+  document.getElementById('selectProduto').value='';
+  preencherCard(produtoAtual);
+  
+  document.getElementById('vazio').classList.add('hidden');
+  document.getElementById('cardProduto').classList.remove('hidden');
+  document.getElementById('btnExcluir').classList.add('hidden');
+  
+  document.getElementById('nomeProduto').focus();
+}
+
+function preencherCard(p){
+  document.getElementById('nomeProduto').value=p.Nome_Produto||'';
+  document.getElementById('precoProduto').value=p.Preco_Guarani?Number(p.Preco_Guarani).toLocaleString('es-PY'):'';
+  document.getElementById('categoriaProduto').value=p.Sessao||'';
+  document.getElementById('descricaoProduto').value=p.Descricao||'';
+  
+  // Status
+  const statusDisp=document.querySelector('input[name="status"][value="Disponível"]');
+  const statusIndisp=document.querySelector('input[name="status"][value="Indisponível"]');
+  if(p.Status==='Disponível'){statusDisp.checked=true;}else{statusIndisp.checked=true;}
+  
+  // Dias
+  DIAS.forEach(d=>{
+    const el=document.querySelector('.toggle-dia[data-dia="'+d+'"]');
+    if(diaAtivo(p[d])){
+      el.classList.add('ativo');
+      el.classList.remove('inativo');
+    }else{
+      el.classList.remove('ativo');
+      el.classList.add('inativo');
+    }
+  });
+  
+  // Imagem
+  atualizarImagem(p.Imagens);
+}
+
+function atualizarImagem(url){
+  const container=document.getElementById('imgContainer');
+  if(url || imagemBase64){
+    const src=imagemBase64||url;
+    container.innerHTML='<img src="'+src+'" class="img-preview" onclick="abrirUpload()">'+
+      '<div class="img-remove" onclick="removerImagem()">×</div>';
+  }else{
+    container.innerHTML='<div class="img-upload-btn" onclick="abrirUpload()">'+
+      '<span class="text-4xl text-gray-400">📷</span>'+
+      '<span class="text-sm text-gray-400">Adicionar foto</span></div>';
+  }
+}
+
+function abrirUpload(){
+  document.getElementById('inputImagem').click();
+}
+
+function imagemSelecionada(event){
+  const file=event.target.files[0];
+  if(!file)return;
+  
+  if(file.size>5*1024*1024){
+    mostrarToast('❌ Imagem muito grande (máx 5MB)');
+    return;
+  }
+  
+  const reader=new FileReader();
+  reader.onload=function(e){
+    imagemBase64=e.target.result;
+    imagemRemovida=false;
+    alterado=true;
+    atualizarImagem(null);
+  };
+  reader.readAsDataURL(file);
+  event.target.value='';
+}
+
+function removerImagem(){
+  imagemBase64=null;
+  imagemRemovida=true;
+  alterado=true;
+  if(produtoAtual)produtoAtual.Imagens='';
+  atualizarImagem(null);
+}
+
+function toggleDia(el){
+  const ativo=el.classList.contains('ativo');
+  if(ativo){
+    el.classList.remove('ativo');
+    el.classList.add('inativo');
+  }else{
+    el.classList.remove('inativo');
+    el.classList.add('ativo');
+  }
+  alterado=true;
+}
+
+function formatarPreco(input){
+  let v=input.value.replace(/\D/g,'');
+  input.value=v?Number(v).toLocaleString('es-PY'):'';
+}
+
+function coletarDados(){
+  const p={...produtoAtual};
+  p.Nome_Produto=document.getElementById('nomeProduto').value;
+  p.Preco_Guarani=document.getElementById('precoProduto').value.replace(/\D/g,'');
+  p.Sessao=document.getElementById('categoriaProduto').value;
+  p.Descricao=document.getElementById('descricaoProduto').value;
+  p.Status=document.querySelector('input[name="status"]:checked').value;
+  
+  DIAS.forEach(d=>{
+    const el=document.querySelector('.toggle-dia[data-dia="'+d+'"]');
+    p[d]=el.classList.contains('ativo')?'TRUE':'FALSE';
+  });
+  
+  if(imagemBase64){
+    p._imagemBase64=imagemBase64;
+  }
+  if(imagemRemovida){
+    p.Imagens='';
+  }
+  if(isNovo){
+    p._novo=true;
+  }
+  
+  return p;
+}
+
+async function salvarProduto(){
+  if(!produtoAtual)return;
+  
+  const btn=document.getElementById('btnSalvar');
+  btn.disabled=true;
+  document.getElementById('btnSalvarText').textContent='Salvando...';
+  
+  const p=coletarDados();
+  
+  const criar=isNovo?[p]:[];
+  const atualizar=isNovo?[]:[p];
+  
+  try{
+    const r=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({acao:'salvarTudo',token,idPlanilha,criar,atualizar})});
+    if(r.ok){
+      mostrarToast('✅ Produto salvo!');
+      alterado=false;
+      
+      // Recarregar lista
+      await carregarProdutos();
+      
+      // Se era novo, selecionar no combo
+      if(isNovo){
+        document.getElementById('selectProduto').value=p.ID_Produto;
+        selecionarProduto();
+      }
+    }
+  }catch(e){mostrarToast('❌ Erro ao salvar');}
+  
+  btn.disabled=false;
+  document.getElementById('btnSalvarText').textContent='💾 Salvar';
+}
+
+async function excluirProduto(){
+  if(!produtoAtual||isNovo)return;
+  
+  if(!confirm('Excluir "'+produtoAtual.Nome_Produto+'"?'))return;
+  
+  const p={...produtoAtual,_excluir:true};
+  
+  try{
+    const r=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({acao:'salvarTudo',token,idPlanilha,criar:[],atualizar:[p]})});
+    if(r.ok){
+      mostrarToast('🗑️ Produto excluído');
+      
+      // Limpar e recarregar
+      produtoAtual=null;
+      document.getElementById('cardProduto').classList.add('hidden');
+      document.getElementById('vazio').classList.remove('hidden');
+      
+      await carregarProdutos();
+    }
+  }catch(e){mostrarToast('❌ Erro ao excluir');}
+}
+
+function mostrarToast(m){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=m;
+  t.classList.remove('hidden');
+  setTimeout(()=>t.classList.add('hidden'),3000);
+}
+
+function mostrarErro(m){
+  document.getElementById('loading').classList.add('hidden');
+  document.getElementById('erro').classList.remove('hidden');
+  document.getElementById('erroMsg').textContent=m;
+}
+
+window.onbeforeunload=()=>{if(alterado)return'Alterações não salvas';};
+  </script>
+</body>
+</html>
