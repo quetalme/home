@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuração - QueTal.me</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    *{font-family:'Inter',sans-serif}
+    .gradient-bg{background:linear-gradient(135deg,#6366f1 0%,#4f46e5 100%)}
+    .card-shadow{box-shadow:0 4px 15px -3px rgba(0,0,0,0.1)}
+    .btn-primary{background:linear-gradient(135deg,#6366f1 0%,#4f46e5 100%)}
+    .spinner{animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .logo-preview{width:120px;height:120px;object-fit:cover;border-radius:50%;border:4px solid #e5e7eb}
+    .logo-upload-btn{width:120px;height:120px;border-radius:50%;border:3px dashed #d1d5db;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;background:#f9fafb;gap:4px}
+    .logo-upload-btn:hover{border-color:#6366f1;background:#eef2ff}
+    .logo-container{position:relative;display:flex;justify-content:center}
+    .logo-edit{position:absolute;bottom:0;right:calc(50% - 60px);width:32px;height:32px;background:#6366f1;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;border:3px solid white}
+    .field-wrapper{position:relative;display:flex;align-items:center}
+    .field-icon{position:absolute;left:0;top:0;bottom:0;width:48px;display:flex;align-items:center;justify-content:center;font-size:18px;pointer-events:none;background:#f3f4f6;border-radius:12px 0 0 12px;border:1px solid #d1d5db;border-right:none}
+    .field-input{width:100%;padding:12px 12px 12px 56px;border:1px solid #d1d5db;border-radius:12px;outline:none;transition:all 0.2s}
+    .field-input:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,0.15)}
+    select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:16px;padding-right:40px;cursor:pointer}
+    .whatsapp-warning{background:#fef3c7;border:1px solid #f59e0b;color:#92400e}
+  </style>
+</head>
+<body class="min-h-screen bg-gray-100">
+  <header class="gradient-bg text-white py-4 px-4 shadow-lg sticky top-0 z-40">
+    <div class="max-w-lg mx-auto flex items-center gap-3">
+      <span class="text-2xl">⚙️</span>
+      <div>
+        <h1 class="font-bold text-lg">Configuração</h1>
+        <p class="text-sm text-indigo-200" id="nomeEmpresaHeader">Carregando...</p>
+      </div>
+    </div>
+  </header>
+  
+  <main class="max-w-lg mx-auto p-4 pb-32">
+    <div id="loading" class="text-center py-12">
+      <div class="inline-block w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full spinner"></div>
+      <p class="text-gray-500 mt-2">Carregando...</p>
+    </div>
+    
+    <div id="formulario" class="hidden space-y-4">
+      
+      <!-- Logo -->
+      <div class="bg-white rounded-xl p-6 card-shadow">
+        <label class="text-sm text-gray-500 mb-3 block text-center">Logo da Empresa</label>
+        <div class="logo-container" id="logoContainer">
+          <div class="logo-upload-btn" onclick="abrirUploadLogo()">
+            <span class="text-3xl text-gray-400">🏪</span>
+            <span class="text-xs text-gray-400">Adicionar</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Dados da Empresa -->
+      <div class="bg-white rounded-xl p-4 card-shadow space-y-4">
+        <h2 class="font-semibold text-gray-700 flex items-center gap-2">🏢 Dados da Empresa</h2>
+        
+        <div>
+          <label class="text-xs text-gray-400 mb-1 block">Nome da Empresa</label>
+          <div class="field-wrapper">
+            <span class="field-icon">🏪</span>
+            <input type="text" id="nomeEmpresa" class="field-input" placeholder="Ex: Carlos Massagista">
+          </div>
+        </div>
+        
+        <div>
+          <label class="text-xs text-gray-400 mb-1 block">WhatsApp (com código do país)</label>
+          <div class="field-wrapper">
+            <span class="field-icon">📱</span>
+            <input type="tel" id="whatsapp" class="field-input" placeholder="Ex: 595993016633">
+          </div>
+          <div id="whatsappWarning" class="hidden mt-2 p-3 rounded-lg whatsapp-warning text-sm">
+            ⚠️ Ao alterar o WhatsApp, você precisará solicitar um novo link de acesso.
+          </div>
+        </div>
+        
+        <div>
+          <label class="text-xs text-gray-400 mb-1 block">RUC</label>
+          <div class="field-wrapper">
+            <span class="field-icon">🧾</span>
+            <input type="text" id="ruc" class="field-input" placeholder="Ex: 80012345-6">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Pagamento -->
+      <div class="bg-white rounded-xl p-4 card-shadow space-y-4">
+        <h2 class="font-semibold text-gray-700 flex items-center gap-2">💰 Pagamento</h2>
+        
+        <div>
+          <label class="text-xs text-gray-400 mb-1 block">Chave PIX</label>
+          <div class="field-wrapper">
+            <span class="field-icon">💸</span>
+            <input type="text" id="pix" class="field-input" placeholder="CPF, Email, Telefone ou Chave aleatória">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Preferências -->
+      <div class="bg-white rounded-xl p-4 card-shadow space-y-4">
+        <h2 class="font-semibold text-gray-700 flex items-center gap-2">🌐 Preferências</h2>
+        
+        <div>
+          <label class="text-xs text-gray-400 mb-1 block">Idioma Principal</label>
+          <div class="field-wrapper">
+            <span class="field-icon">🗣️</span>
+            <select id="idioma" class="field-input">
+              <option value="Português">🇧🇷 Português</option>
+              <option value="Español">🇵🇾 Español</option>
+            </select>
+          </div>
+        </div>
+        
+        <div>
+          <label class="text-xs text-gray-400 mb-1 block">Localização (Link Google Maps)</label>
+          <div class="field-wrapper">
+            <span class="field-icon">📍</span>
+            <input type="url" id="localizacao" class="field-input" placeholder="https://maps.google.com/...">
+          </div>
+          <a id="linkMaps" href="#" target="_blank" class="hidden mt-2 text-sm text-indigo-600 hover:underline inline-flex items-center gap-1">
+            🗺️ Abrir no Google Maps
+          </a>
+        </div>
+      </div>
+      
+      <button onclick="salvarConfig()" id="btnSalvar" class="w-full py-4 btn-primary text-white rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg hover:opacity-90 transition-opacity">
+        <span id="btnSalvarText">💾 Salvar Configurações</span>
+      </button>
+      
+    </div>
+    
+    <div id="erro" class="hidden text-center py-12">
+      <span class="text-6xl">⚠️</span>
+      <p class="text-red-500 mt-4 font-medium" id="erroMsg">Erro</p>
+      <button onclick="location.reload()" class="mt-4 px-6 py-2 bg-indigo-500 text-white rounded-lg">Tentar novamente</button>
+    </div>
+  </main>
+  
+  <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-xl shadow-lg hidden z-50 transition-all">
+    <span id="toastMsg"></span>
+  </div>
+  
+  <input type="file" id="inputLogo" accept="image/*" class="hidden" onchange="logoSelecionado(event)">
+  
+  <script>
+const WEBHOOK_URL = 'https://webhook.quetal.me/webhook/eConfig';
+
+let token = '';
+let configOriginal = {};
+let logoBase64 = null;
+let logoAlterado = false;
+
+// IMPORTANTE: Guardar WhatsApp original como veio do servidor
+let whatsappOriginal = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  token = new URLSearchParams(location.search).get('token') || '';
+  if (!token) {
+    mostrarErro('Link inválido. Envie /config no WhatsApp.');
+    return;
+  }
+  carregarConfig();
+});
+
+async function carregarConfig() {
+  try {
+    const r = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ acao: 'carregar', token })
+    });
+    const d = await r.json();
+    
+    if (d.success) {
+      configOriginal = { ...d.config };
+      
+      // IMPORTANTE: Guardar WhatsApp original EXATAMENTE como veio
+      whatsappOriginal = String(d.config.WhatsApp || '').trim();
+      
+      console.log('WhatsApp original carregado:', JSON.stringify(whatsappOriginal));
+      
+      preencherFormulario(d.config);
+      
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('formulario').classList.remove('hidden');
+    } else {
+      mostrarErro(d.message || 'Token expirado ou inválido');
+    }
+  } catch (e) {
+    console.error('Erro:', e);
+    mostrarErro('Erro de conexão. Verifique sua internet.');
+  }
+}
+
+function preencherFormulario(c) {
+  document.getElementById('nomeEmpresaHeader').textContent = c.Nome_Empresa || 'Configuração';
+  document.getElementById('nomeEmpresa').value = c.Nome_Empresa || '';
+  document.getElementById('whatsapp').value = c.WhatsApp || '';
+  document.getElementById('ruc').value = c.RUC || '';
+  document.getElementById('pix').value = c.Pix || '';
+  document.getElementById('idioma').value = c.Idioma_Principal || 'Português';
+  document.getElementById('localizacao').value = c.Localizacao || '';
+  
+  if (c.Localizacao) {
+    const link = document.getElementById('linkMaps');
+    link.href = c.Localizacao;
+    link.classList.remove('hidden');
+  }
+  
+  atualizarLogo(c.URL_Imagem);
+}
+
+function atualizarLogo(url) {
+  const container = document.getElementById('logoContainer');
+  if (url || logoBase64) {
+    const src = logoBase64 || url;
+    container.innerHTML = '<img src="' + src + '" class="logo-preview" onclick="abrirUploadLogo()">' +
+      '<div class="logo-edit" onclick="abrirUploadLogo()">✏️</div>';
+  } else {
+    container.innerHTML = '<div class="logo-upload-btn" onclick="abrirUploadLogo()">' +
+      '<span class="text-3xl text-gray-400">🏪</span>' +
+      '<span class="text-xs text-gray-400">Adicionar</span></div>';
+  }
+}
+
+function abrirUploadLogo() {
+  document.getElementById('inputLogo').click();
+}
+
+function logoSelecionado(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  if (file.size > 5 * 1024 * 1024) {
+    mostrarToast('❌ Imagem muito grande (máx 5MB)');
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    logoBase64 = e.target.result;
+    logoAlterado = true;
+    atualizarLogo(null);
+    mostrarToast('✅ Logo atualizado');
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+// Detectar mudança no WhatsApp
+document.getElementById('whatsapp').addEventListener('input', function() {
+  const valorAtual = String(this.value || '').trim();
+  const warning = document.getElementById('whatsappWarning');
+  
+  // Comparação simples: se diferente do original, mostra warning
+  const mudou = (whatsappOriginal !== null) && (valorAtual !== whatsappOriginal);
+  
+  console.log('WhatsApp check:', { original: whatsappOriginal, atual: valorAtual, mudou: mudou });
+  
+  if (mudou) {
+    warning.classList.remove('hidden');
+  } else {
+    warning.classList.add('hidden');
+  }
+});
+
+// Atualizar link do Maps
+document.getElementById('localizacao').addEventListener('input', function() {
+  const link = document.getElementById('linkMaps');
+  if (this.value && this.value.startsWith('http')) {
+    link.href = this.value;
+    link.classList.remove('hidden');
+  } else {
+    link.classList.add('hidden');
+  }
+});
+
+function coletarDados() {
+  const whatsappAtual = String(document.getElementById('whatsapp').value || '').trim();
+  
+  // Comparação definitiva
+  const whatsappMudou = (whatsappOriginal !== null) && 
+                        (whatsappOriginal !== '') && 
+                        (whatsappAtual !== whatsappOriginal);
+  
+  console.log('Salvar - WhatsApp:', { 
+    original: whatsappOriginal, 
+    atual: whatsappAtual, 
+    mudou: whatsappMudou 
+  });
+  
+  return {
+    URL_Imagem: logoBase64 ? '_UPLOAD_' : (configOriginal.URL_Imagem || ''),
+    Nome_Empresa: document.getElementById('nomeEmpresa').value.trim(),
+    WhatsApp: whatsappAtual,
+    Idioma_Principal: document.getElementById('idioma').value,
+    Pix: document.getElementById('pix').value.trim(),
+    RUC: document.getElementById('ruc').value.trim(),
+    Localizacao: document.getElementById('localizacao').value.trim(),
+    _logoBase64: logoBase64 || null,
+    _logoAlterado: logoAlterado,
+    _whatsappAlterado: whatsappMudou
+  };
+}
+
+async function salvarConfig() {
+  const btn = document.getElementById('btnSalvar');
+  const btnText = document.getElementById('btnSalvarText');
+  
+  btn.disabled = true;
+  btnText.innerHTML = '<span class="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full spinner"></span> Salvando...';
+  
+  const dados = coletarDados();
+  
+  console.log('Enviando para webhook:', dados);
+  
+  try {
+    const r = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ acao: 'salvar', token, config: dados })
+    });
+    const d = await r.json();
+    
+    if (d.success) {
+      if (dados._whatsappAlterado) {
+        mostrarToast('✅ Salvo! WhatsApp alterado.');
+        setTimeout(() => {
+          alert('WhatsApp alterado!\n\nEnvie /config no WhatsApp para obter um novo link de acesso.');
+        }, 500);
+      } else {
+        mostrarToast('✅ Configurações salvas!');
+        // Atualizar valores originais
+        configOriginal = {
+          URL_Imagem: dados._logoAlterado ? '_NOVO_' : configOriginal.URL_Imagem,
+          Nome_Empresa: dados.Nome_Empresa,
+          WhatsApp: dados.WhatsApp,
+          Idioma_Principal: dados.Idioma_Principal,
+          Pix: dados.Pix,
+          RUC: dados.RUC,
+          Localizacao: dados.Localizacao
+        };
+        whatsappOriginal = dados.WhatsApp;
+        logoAlterado = false;
+        logoBase64 = null;
+        
+        document.getElementById('whatsappWarning').classList.add('hidden');
+      }
+    } else {
+      mostrarToast('❌ ' + (d.message || 'Erro ao salvar'));
+    }
+  } catch (e) {
+    console.error('Erro ao salvar:', e);
+    mostrarToast('❌ Erro de conexão');
+  }
+  
+  btn.disabled = false;
+  btnText.textContent = '💾 Salvar Configurações';
+}
+
+function mostrarToast(m) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = m;
+  t.classList.remove('hidden');
+  setTimeout(() => t.classList.add('hidden'), 3000);
+}
+
+function mostrarErro(m) {
+  document.getElementById('loading').classList.add('hidden');
+  document.getElementById('erro').classList.remove('hidden');
+  document.getElementById('erroMsg').textContent = m;
+}
+  </script>
+</body>
+</html>
