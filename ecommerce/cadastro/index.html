@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Criar eCommerce - QueTal.me</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .card-shadow { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+    .input-focus:focus { box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3); }
+    .btn-gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .btn-gradient:hover { background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%); }
+    .logo-preview { 
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23f3f4f6'/%3E%3Cpath d='M0 0h20v20H0zM20 20h20v20H20z' fill='%23e5e7eb'/%3E%3C/svg%3E");
+    }
+    .spinner { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .fade-in { animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body class="min-h-screen gradient-bg flex items-center justify-center p-4">
+  
+  <div class="w-full max-w-md">
+    
+    <!-- Card do Formulário -->
+    <div id="formCard" class="bg-white rounded-2xl card-shadow p-8 fade-in">
+      
+      <div class="text-center mb-6">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl mb-4">
+          <span class="text-3xl">🛒</span>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-800" data-i18n="title">Criar seu eCommerce</h1>
+        <p class="text-gray-500 mt-1" data-i18n="subtitle">Preencha os dados do seu negócio</p>
+      </div>
+
+      <!-- Seletor de Idioma -->
+      <div class="flex justify-center gap-2 mb-6">
+        <button onclick="setLang('pt')" id="btn-pt" class="px-3 py-1 rounded-full text-sm font-medium transition-all bg-purple-100 text-purple-700">
+          🇧🇷 Português
+        </button>
+        <button onclick="setLang('es')" id="btn-es" class="px-3 py-1 rounded-full text-sm font-medium transition-all bg-gray-100 text-gray-500 hover:bg-gray-200">
+          🇵🇾 Español
+        </button>
+      </div>
+
+      <!-- Formulário -->
+      <form id="cadastroForm" class="space-y-5">
+        
+        <input type="hidden" id="token" name="token" value="">
+
+        <!-- Nome da Empresa -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="label_nome">
+            Nome da Empresa *
+          </label>
+          <input 
+            type="text" 
+            id="nome" 
+            name="nome"
+            required
+            class="w-full px-4 py-3 border border-gray-300 rounded-xl input-focus focus:border-purple-500 focus:outline-none transition-all"
+            data-i18n-placeholder="placeholder_nome"
+            placeholder="Ex: Restaurante Tropical"
+          >
+        </div>
+
+        <!-- WhatsApp -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="label_whatsapp">
+            WhatsApp do Negócio *
+          </label>
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">📱</span>
+            <input 
+              type="tel" 
+              id="whatsapp" 
+              name="whatsapp"
+              required
+              class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl input-focus focus:border-purple-500 focus:outline-none transition-all"
+              placeholder="595 981 234567"
+              oninput="formatWhatsApp(this)"
+            >
+          </div>
+          <p class="text-xs text-gray-400 mt-1" data-i18n="hint_whatsapp">Com código do país (595, 55, 54)</p>
+        </div>
+
+        <!-- Idioma Principal -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="label_idioma">
+            Idioma Principal *
+          </label>
+          <select 
+            id="idioma" 
+            name="idioma"
+            required
+            class="w-full px-4 py-3 border border-gray-300 rounded-xl input-focus focus:border-purple-500 focus:outline-none transition-all appearance-none bg-white"
+          >
+            <option value="Português">🇧🇷 Português</option>
+            <option value="Español">🇵🇾 Español</option>
+            <option value="Guaraní">🇵🇾 Guaraní</option>
+          </select>
+        </div>
+
+        <!-- Logo Upload -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="label_logo">
+            Logo (opcional)
+          </label>
+          <div class="flex items-center gap-4">
+            <div id="logoPreview" class="w-20 h-20 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden logo-preview">
+              <span id="logoPlaceholder" class="text-3xl text-gray-300">🖼️</span>
+              <img id="logoImg" class="w-full h-full object-cover hidden" alt="Logo preview">
+            </div>
+            <div class="flex-1">
+              <label class="cursor-pointer">
+                <div class="px-4 py-2 border border-gray-300 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-all text-center">
+                  <span data-i18n="btn_upload">📤 Escolher imagem</span>
+                </div>
+                <input 
+                  type="file" 
+                  id="logo" 
+                  name="logo"
+                  accept="image/png,image/jpeg,image/jpg"
+                  class="hidden"
+                  onchange="previewLogo(this)"
+                >
+              </label>
+              <p class="text-xs text-gray-400 mt-1">PNG ou JPG, máx 2MB</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botão Submit -->
+        <button 
+          type="submit" 
+          id="submitBtn"
+          class="w-full py-4 btn-gradient text-white font-semibold rounded-xl transition-all hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          <span id="btnText" data-i18n="btn_submit">🚀 Criar meu eCommerce</span>
+          <svg id="btnSpinner" class="w-5 h-5 spinner hidden" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </button>
+
+      </form>
+
+      <p class="text-center text-xs text-gray-400 mt-6">
+        <span data-i18n="footer">Powered by</span> 
+        <a href="https://quetal.me" class="text-purple-600 hover:underline">QueTal.me</a>
+      </p>
+
+    </div>
+
+    <!-- Card de Sucesso -->
+    <div id="successCard" class="bg-white rounded-2xl card-shadow p-8 text-center hidden fade-in">
+      <div class="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-4">
+        <span class="text-5xl">🎉</span>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-800 mb-2" data-i18n="success_title">eCommerce Criado!</h2>
+      <p class="text-gray-500 mb-4" data-i18n="success_subtitle">Seu negócio está online</p>
+      
+      <div class="bg-gray-50 rounded-xl p-4 mb-4">
+        <p class="text-sm text-gray-500 mb-1" data-i18n="success_link">Seu link:</p>
+        <a id="lojaLink" href="#" target="_blank" class="text-lg font-semibold text-purple-600 hover:underline break-all">
+          lnk.quetal.me/SeuNegocio
+        </a>
+      </div>
+
+      <p class="text-sm text-gray-500" data-i18n="success_whatsapp">
+        📱 Enviamos os comandos no seu WhatsApp!
+      </p>
+    </div>
+
+    <!-- Card de Erro -->
+    <div id="errorCard" class="bg-white rounded-2xl card-shadow p-8 text-center hidden fade-in">
+      <div class="inline-flex items-center justify-center w-20 h-20 bg-red-100 rounded-full mb-4">
+        <span class="text-5xl">⚠️</span>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-800 mb-2" data-i18n="error_title">Link Expirado</h2>
+      <p class="text-gray-500 mb-4" data-i18n="error_subtitle">Este link não é mais válido</p>
+      <p class="text-sm text-gray-500" data-i18n="error_help">
+        Solicite um novo link enviando:<br>
+        <span class="font-mono bg-gray-100 px-2 py-1 rounded">/cadastro</span>
+      </p>
+    </div>
+
+  </div>
+
+  <script>
+    // ==================== CONFIGURAÇÃO ====================
+    const WEBHOOK_URL = 'https://webhook.quetal.me/webhook/eCadastro';
+    
+    // ==================== TRADUÇÕES ====================
+    const translations = {
+      pt: {
+        title: 'Criar seu eCommerce',
+        subtitle: 'Preencha os dados do seu negócio',
+        label_nome: 'Nome da Empresa *',
+        placeholder_nome: 'Ex: Restaurante Tropical',
+        label_whatsapp: 'WhatsApp do Negócio *',
+        hint_whatsapp: 'Com código do país (595, 55, 54)',
+        label_idioma: 'Idioma Principal *',
+        label_logo: 'Logo (opcional)',
+        btn_upload: '📤 Escolher imagem',
+        btn_submit: '🚀 Criar meu eCommerce',
+        btn_creating: 'Criando...',
+        footer: 'Powered by',
+        success_title: 'eCommerce Criado!',
+        success_subtitle: 'Seu negócio está online',
+        success_link: 'Seu link:',
+        success_whatsapp: '📱 Enviamos os comandos no seu WhatsApp!',
+        error_title: 'Link Expirado',
+        error_subtitle: 'Este link não é mais válido',
+        error_help: 'Solicite um novo link enviando:'
+      },
+      es: {
+        title: 'Crear tu eCommerce',
+        subtitle: 'Completa los datos de tu negocio',
+        label_nome: 'Nombre de la Empresa *',
+        placeholder_nome: 'Ej: Restaurante Tropical',
+        label_whatsapp: 'WhatsApp del Negocio *',
+        hint_whatsapp: 'Con código de país (595, 55, 54)',
+        label_idioma: 'Idioma Principal *',
+        label_logo: 'Logo (opcional)',
+        btn_upload: '📤 Elegir imagen',
+        btn_submit: '🚀 Crear mi eCommerce',
+        btn_creating: 'Creando...',
+        footer: 'Powered by',
+        success_title: '¡eCommerce Creado!',
+        success_subtitle: 'Tu negocio está online',
+        success_link: 'Tu enlace:',
+        success_whatsapp: '📱 ¡Enviamos los comandos a tu WhatsApp!',
+        error_title: 'Enlace Expirado',
+        error_subtitle: 'Este enlace ya no es válido',
+        error_help: 'Solicita un nuevo enlace enviando:'
+      }
+    };
+
+    let currentLang = 'pt';
+    let nomeEmpresaGlobal = '';
+
+    // ==================== FUNÇÕES ====================
+    
+    function detectLang() {
+      const params = new URLSearchParams(window.location.search);
+      const lang = params.get('lang');
+      if (lang === 'es') {
+        setLang('es');
+      } else {
+        setLang('pt');
+      }
+      
+      const token = params.get('token');
+      if (token) {
+        document.getElementById('token').value = token;
+      }
+    }
+
+    function setLang(lang) {
+      currentLang = lang;
+      
+      document.getElementById('btn-pt').className = lang === 'pt' 
+        ? 'px-3 py-1 rounded-full text-sm font-medium transition-all bg-purple-100 text-purple-700'
+        : 'px-3 py-1 rounded-full text-sm font-medium transition-all bg-gray-100 text-gray-500 hover:bg-gray-200';
+      document.getElementById('btn-es').className = lang === 'es'
+        ? 'px-3 py-1 rounded-full text-sm font-medium transition-all bg-purple-100 text-purple-700'
+        : 'px-3 py-1 rounded-full text-sm font-medium transition-all bg-gray-100 text-gray-500 hover:bg-gray-200';
+      
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang][key]) {
+          el.textContent = translations[lang][key];
+        }
+      });
+      
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (translations[lang][key]) {
+          el.placeholder = translations[lang][key];
+        }
+      });
+    }
+
+    function formatWhatsApp(input) {
+      let value = input.value.replace(/\D/g, '');
+      if (value.length > 15) value = value.slice(0, 15);
+      
+      if (value.length > 3 && value.length <= 6) {
+        value = value.slice(0, 3) + ' ' + value.slice(3);
+      } else if (value.length > 6) {
+        value = value.slice(0, 3) + ' ' + value.slice(3, 6) + ' ' + value.slice(6);
+      }
+      
+      input.value = value;
+    }
+
+    function previewLogo(input) {
+      const file = input.files[0];
+      if (file) {
+        if (file.size > 2 * 1024 * 1024) {
+          alert(currentLang === 'es' ? 'Imagen muy grande (máx 2MB)' : 'Imagem muito grande (máx 2MB)');
+          input.value = '';
+          return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('logoImg').src = e.target.result;
+          document.getElementById('logoImg').classList.remove('hidden');
+          document.getElementById('logoPlaceholder').classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
+
+    function gerarSlug(nome) {
+      return nome.replace(/[^a-zA-Z0-9]/g, '');
+    }
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('submitBtn');
+      const btnText = document.getElementById('btnText');
+      const btnSpinner = document.getElementById('btnSpinner');
+      
+      // Salvar nome para usar depois
+      nomeEmpresaGlobal = document.getElementById('nome').value;
+      
+      // Loading
+      submitBtn.disabled = true;
+      btnText.textContent = translations[currentLang].btn_creating;
+      btnSpinner.classList.remove('hidden');
+      
+      try {
+        const formData = {
+          token: document.getElementById('token').value,
+          nome: nomeEmpresaGlobal,
+          whatsapp: document.getElementById('whatsapp').value.replace(/\D/g, ''),
+          idioma: document.getElementById('idioma').value,
+          lang: currentLang
+        };
+        
+        const logoInput = document.getElementById('logo');
+        if (logoInput.files[0]) {
+          formData.logo = await fileToBase64(logoInput.files[0]);
+          formData.logoName = logoInput.files[0].name;
+        }
+        
+        // Enviar para webhook
+        const response = await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+        
+        // Se não deu erro HTTP, considera sucesso
+        // (o webhook pode retornar 200 sem body, ou com body vazio)
+        if (response.ok) {
+          // Mostrar sucesso
+          document.getElementById('formCard').classList.add('hidden');
+          document.getElementById('successCard').classList.remove('hidden');
+          
+          // Montar link baseado no nome
+          const slug = gerarSlug(nomeEmpresaGlobal);
+          const link = `https://lnk.quetal.me/${slug}`;
+          document.getElementById('lojaLink').href = link;
+          document.getElementById('lojaLink').textContent = link;
+        } else {
+          // Erro HTTP - provavelmente token inválido
+          document.getElementById('formCard').classList.add('hidden');
+          document.getElementById('errorCard').classList.remove('hidden');
+        }
+        
+      } catch (error) {
+        console.error('Erro:', error);
+        alert(currentLang === 'es' 
+          ? '❌ Error al crear. Intenta de nuevo.' 
+          : '❌ Erro ao criar. Tente novamente.');
+        
+        // Reset button
+        submitBtn.disabled = false;
+        btnText.textContent = translations[currentLang].btn_submit;
+        btnSpinner.classList.add('hidden');
+      }
+    }
+
+    // ==================== INICIALIZAÇÃO ====================
+    document.addEventListener('DOMContentLoaded', function() {
+      detectLang();
+      document.getElementById('cadastroForm').addEventListener('submit', handleSubmit);
+    });
+  </script>
+
+</body>
+</html>
