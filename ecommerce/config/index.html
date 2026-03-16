@@ -17,9 +17,48 @@
     .logo-upload-btn:hover{border-color:#6366f1;background:#eef2ff}
     .logo-container{position:relative;display:flex;justify-content:center}
     .logo-edit{position:absolute;bottom:0;right:calc(50% - 60px);width:32px;height:32px;background:#6366f1;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;border:3px solid white}
-    .field-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:18px}
-    .field-input{padding-left:44px}
-    select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:16px}
+    
+    /* FIX: Ícones com largura fixa e padding correto */
+    .field-wrapper{position:relative;display:flex;align-items:center}
+    .field-icon{
+      position:absolute;
+      left:0;
+      top:0;
+      bottom:0;
+      width:48px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+      pointer-events:none;
+      background:#f3f4f6;
+      border-radius:12px 0 0 12px;
+      border:1px solid #d1d5db;
+      border-right:none;
+    }
+    .field-input{
+      width:100%;
+      padding:12px 12px 12px 56px;
+      border:1px solid #d1d5db;
+      border-radius:12px;
+      outline:none;
+      transition:all 0.2s;
+    }
+    .field-input:focus{
+      border-color:#6366f1;
+      box-shadow:0 0 0 3px rgba(99,102,241,0.15);
+    }
+    
+    select.field-input{
+      appearance:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat:no-repeat;
+      background-position:right 12px center;
+      background-size:16px;
+      padding-right:40px;
+      cursor:pointer;
+    }
+    
     .whatsapp-warning{background:#fef3c7;border:1px solid #f59e0b;color:#92400e}
   </style>
 </head>
@@ -27,7 +66,10 @@
   <header class="gradient-bg text-white py-4 px-4 shadow-lg sticky top-0 z-40">
     <div class="max-w-lg mx-auto flex items-center gap-3">
       <span class="text-2xl">⚙️</span>
-      <div><h1 class="font-bold text-lg">Configuração</h1><p class="text-sm text-indigo-200" id="nomeEmpresaHeader">Carregando...</p></div>
+      <div>
+        <h1 class="font-bold text-lg">Configuração</h1>
+        <p class="text-sm text-indigo-200" id="nomeEmpresaHeader">Carregando...</p>
+      </div>
     </div>
   </header>
   
@@ -59,18 +101,18 @@
         <!-- Nome da Empresa -->
         <div>
           <label class="text-xs text-gray-400 mb-1 block">Nome da Empresa</label>
-          <div class="relative">
+          <div class="field-wrapper">
             <span class="field-icon">🏪</span>
-            <input type="text" id="nomeEmpresa" class="field-input w-full p-3 border border-gray-300 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none" placeholder="Ex: Carlos Massagista">
+            <input type="text" id="nomeEmpresa" class="field-input" placeholder="Ex: Carlos Massagista">
           </div>
         </div>
         
         <!-- WhatsApp -->
         <div>
           <label class="text-xs text-gray-400 mb-1 block">WhatsApp (com código do país)</label>
-          <div class="relative">
+          <div class="field-wrapper">
             <span class="field-icon">📱</span>
-            <input type="tel" id="whatsapp" class="field-input w-full p-3 border border-gray-300 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none" placeholder="Ex: 595993016633">
+            <input type="tel" id="whatsapp" class="field-input" placeholder="Ex: 595993016633">
           </div>
           <div id="whatsappWarning" class="hidden mt-2 p-3 rounded-lg whatsapp-warning text-sm">
             ⚠️ Ao alterar o WhatsApp, você precisará solicitar um novo link de acesso.
@@ -80,9 +122,9 @@
         <!-- RUC -->
         <div>
           <label class="text-xs text-gray-400 mb-1 block">RUC</label>
-          <div class="relative">
+          <div class="field-wrapper">
             <span class="field-icon">🧾</span>
-            <input type="text" id="ruc" class="field-input w-full p-3 border border-gray-300 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none" placeholder="Ex: 80012345-6">
+            <input type="text" id="ruc" class="field-input" placeholder="Ex: 80012345-6">
           </div>
         </div>
       </div>
@@ -94,9 +136,9 @@
         <!-- PIX -->
         <div>
           <label class="text-xs text-gray-400 mb-1 block">Chave PIX</label>
-          <div class="relative">
+          <div class="field-wrapper">
             <span class="field-icon">💸</span>
-            <input type="text" id="pix" class="field-input w-full p-3 border border-gray-300 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none" placeholder="CPF, Email, Telefone ou Chave aleatória">
+            <input type="text" id="pix" class="field-input" placeholder="CPF, Email, Telefone ou Chave aleatória">
           </div>
         </div>
       </div>
@@ -108,9 +150,9 @@
         <!-- Idioma -->
         <div>
           <label class="text-xs text-gray-400 mb-1 block">Idioma Principal</label>
-          <div class="relative">
+          <div class="field-wrapper">
             <span class="field-icon">🗣️</span>
-            <select id="idioma" class="field-input w-full p-3 border border-gray-300 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none cursor-pointer pr-10">
+            <select id="idioma" class="field-input">
               <option value="Português">🇧🇷 Português</option>
               <option value="Español">🇵🇾 Español</option>
             </select>
@@ -120,9 +162,9 @@
         <!-- Localização -->
         <div>
           <label class="text-xs text-gray-400 mb-1 block">Localização (Link Google Maps)</label>
-          <div class="relative">
+          <div class="field-wrapper">
             <span class="field-icon">📍</span>
-            <input type="url" id="localizacao" class="field-input w-full p-3 border border-gray-300 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none" placeholder="https://maps.google.com/...">
+            <input type="url" id="localizacao" class="field-input" placeholder="https://maps.google.com/...">
           </div>
           <a id="linkMaps" href="#" target="_blank" class="hidden mt-2 text-sm text-indigo-600 hover:underline inline-flex items-center gap-1">
             🗺️ Abrir no Google Maps
@@ -131,7 +173,7 @@
       </div>
       
       <!-- Botão Salvar -->
-      <button onclick="salvarConfig()" id="btnSalvar" class="w-full py-4 btn-primary text-white rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg">
+      <button onclick="salvarConfig()" id="btnSalvar" class="w-full py-4 btn-primary text-white rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg hover:opacity-90 transition-opacity">
         <span id="btnSalvarText">💾 Salvar Configurações</span>
       </button>
       
@@ -140,59 +182,73 @@
     <!-- Erro -->
     <div id="erro" class="hidden text-center py-12">
       <span class="text-6xl">⚠️</span>
-      <p class="text-red-500 mt-4" id="erroMsg">Erro</p>
+      <p class="text-red-500 mt-4 font-medium" id="erroMsg">Erro</p>
+      <button onclick="location.reload()" class="mt-4 px-6 py-2 bg-indigo-500 text-white rounded-lg">Tentar novamente</button>
     </div>
   </main>
   
-  <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-xl shadow-lg hidden z-50">
+  <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-xl shadow-lg hidden z-50 transition-all">
     <span id="toastMsg"></span>
   </div>
   
   <input type="file" id="inputLogo" accept="image/*" class="hidden" onchange="logoSelecionado(event)">
   
   <script>
-const WEBHOOK_URL='https://webhook.quetal.me/webhook/eConfig';
+const WEBHOOK_URL = 'https://webhook.quetal.me/webhook/eConfig';
 
-let token='', configOriginal={}, configAtual={};
-let logoBase64=null, logoAlterado=false;
-let whatsappOriginal='';
+let token = '';
+let configOriginal = {};
+let logoBase64 = null;
+let logoAlterado = false;
+let whatsappOriginal = '';
 
-document.addEventListener('DOMContentLoaded',()=>{
-  token=new URLSearchParams(location.search).get('token')||'';
-  if(!token){mostrarErro('Link inválido. Envie /config no WhatsApp.');return;}
+document.addEventListener('DOMContentLoaded', () => {
+  token = new URLSearchParams(location.search).get('token') || '';
+  if (!token) {
+    mostrarErro('Link inválido. Envie /config no WhatsApp.');
+    return;
+  }
   carregarConfig();
 });
 
-async function carregarConfig(){
-  try{
-    const r=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({acao:'carregar',token})});
-    const d=await r.json();
-    if(d.success){
-      configOriginal={...d.config};
-      configAtual={...d.config};
-      whatsappOriginal=d.config.WhatsApp||'';
+async function carregarConfig() {
+  try {
+    const r = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ acao: 'carregar', token })
+    });
+    const d = await r.json();
+    
+    if (d.success) {
+      configOriginal = { ...d.config };
+      whatsappOriginal = d.config.WhatsApp || '';
       
       preencherFormulario(d.config);
       
       document.getElementById('loading').classList.add('hidden');
       document.getElementById('formulario').classList.remove('hidden');
-    }else{mostrarErro(d.message||'Erro ao carregar');}
-  }catch(e){mostrarErro('Erro de conexão');}
+    } else {
+      mostrarErro(d.message || 'Token expirado ou inválido');
+    }
+  } catch (e) {
+    mostrarErro('Erro de conexão. Verifique sua internet.');
+  }
 }
 
-function preencherFormulario(c){
-  document.getElementById('nomeEmpresaHeader').textContent=c.Nome_Empresa||'Configuração';
-  document.getElementById('nomeEmpresa').value=c.Nome_Empresa||'';
-  document.getElementById('whatsapp').value=c.WhatsApp||'';
-  document.getElementById('ruc').value=c.RUC||'';
-  document.getElementById('pix').value=c.Pix||'';
-  document.getElementById('idioma').value=c.Idioma_Principal||'Português';
-  document.getElementById('localizacao').value=c.Localizacao||'';
+function preencherFormulario(c) {
+  document.getElementById('nomeEmpresaHeader').textContent = c.Nome_Empresa || 'Configuração';
+  document.getElementById('nomeEmpresa').value = c.Nome_Empresa || '';
+  document.getElementById('whatsapp').value = c.WhatsApp || '';
+  document.getElementById('ruc').value = c.RUC || '';
+  document.getElementById('pix').value = c.Pix || '';
+  document.getElementById('idioma').value = c.Idioma_Principal || 'Português';
+  document.getElementById('localizacao').value = c.Localizacao || '';
   
   // Link do Maps
-  if(c.Localizacao){
-    const link=document.getElementById('linkMaps');
-    link.href=c.Localizacao;
+  if (c.Localizacao) {
+    const link = document.getElementById('linkMaps');
+    link.href = c.Localizacao;
     link.classList.remove('hidden');
   }
   
@@ -200,124 +256,154 @@ function preencherFormulario(c){
   atualizarLogo(c.URL_Imagem);
 }
 
-function atualizarLogo(url){
-  const container=document.getElementById('logoContainer');
-  if(url || logoBase64){
-    const src=logoBase64||url;
-    container.innerHTML='<img src="'+src+'" class="logo-preview" onclick="abrirUploadLogo()">'+
-      '<div class="logo-edit" onclick="abrirUploadLogo()">✏️</div>';
-  }else{
-    container.innerHTML='<div class="logo-upload-btn" onclick="abrirUploadLogo()">'+
-      '<span class="text-3xl text-gray-400">🏪</span>'+
-      '<span class="text-xs text-gray-400">Adicionar</span></div>';
+function atualizarLogo(url) {
+  const container = document.getElementById('logoContainer');
+  if (url || logoBase64) {
+    const src = logoBase64 || url;
+    container.innerHTML = `
+      <img src="${src}" class="logo-preview" onclick="abrirUploadLogo()">
+      <div class="logo-edit" onclick="abrirUploadLogo()">✏️</div>
+    `;
+  } else {
+    container.innerHTML = `
+      <div class="logo-upload-btn" onclick="abrirUploadLogo()">
+        <span class="text-3xl text-gray-400">🏪</span>
+        <span class="text-xs text-gray-400">Adicionar</span>
+      </div>
+    `;
   }
 }
 
-function abrirUploadLogo(){
+function abrirUploadLogo() {
   document.getElementById('inputLogo').click();
 }
 
-function logoSelecionado(event){
-  const file=event.target.files[0];
-  if(!file)return;
+function logoSelecionado(event) {
+  const file = event.target.files[0];
+  if (!file) return;
   
-  if(file.size>5*1024*1024){
+  if (file.size > 5 * 1024 * 1024) {
     mostrarToast('❌ Imagem muito grande (máx 5MB)');
     return;
   }
   
-  const reader=new FileReader();
-  reader.onload=function(e){
-    logoBase64=e.target.result;
-    logoAlterado=true;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    logoBase64 = e.target.result;
+    logoAlterado = true;
     atualizarLogo(null);
+    mostrarToast('✅ Logo atualizado');
   };
   reader.readAsDataURL(file);
-  event.target.value='';
+  event.target.value = '';
 }
 
-// Detectar mudança no WhatsApp
-document.getElementById('whatsapp').addEventListener('input',function(){
-  const warning=document.getElementById('whatsappWarning');
-  if(this.value!==whatsappOriginal && whatsappOriginal){
+// FIX: Detectar mudança REAL no WhatsApp (comparando com valor original)
+document.getElementById('whatsapp').addEventListener('input', function() {
+  const valorAtual = this.value.trim();
+  const warning = document.getElementById('whatsappWarning');
+  
+  // Só mostra warning se tinha valor original E o valor mudou
+  if (whatsappOriginal && valorAtual !== whatsappOriginal) {
     warning.classList.remove('hidden');
-  }else{
+  } else {
     warning.classList.add('hidden');
   }
 });
 
 // Atualizar link do Maps
-document.getElementById('localizacao').addEventListener('input',function(){
-  const link=document.getElementById('linkMaps');
-  if(this.value && this.value.startsWith('http')){
-    link.href=this.value;
+document.getElementById('localizacao').addEventListener('input', function() {
+  const link = document.getElementById('linkMaps');
+  if (this.value && this.value.startsWith('http')) {
+    link.href = this.value;
     link.classList.remove('hidden');
-  }else{
+  } else {
     link.classList.add('hidden');
   }
 });
 
-function coletarDados(){
+function coletarDados() {
+  const whatsappAtual = document.getElementById('whatsapp').value.trim();
+  
   return {
-    URL_Imagem: logoBase64 ? '_UPLOAD_' : (configOriginal.URL_Imagem||''),
-    Nome_Empresa: document.getElementById('nomeEmpresa').value,
-    WhatsApp: document.getElementById('whatsapp').value,
+    URL_Imagem: logoBase64 ? '_UPLOAD_' : (configOriginal.URL_Imagem || ''),
+    Nome_Empresa: document.getElementById('nomeEmpresa').value.trim(),
+    WhatsApp: whatsappAtual,
     Idioma_Principal: document.getElementById('idioma').value,
-    Pix: document.getElementById('pix').value,
-    RUC: document.getElementById('ruc').value,
-    Localizacao: document.getElementById('localizacao').value,
-    _logoBase64: logoBase64||null,
+    Pix: document.getElementById('pix').value.trim(),
+    RUC: document.getElementById('ruc').value.trim(),
+    Localizacao: document.getElementById('localizacao').value.trim(),
+    _logoBase64: logoBase64 || null,
     _logoAlterado: logoAlterado,
-    _whatsappAlterado: document.getElementById('whatsapp').value !== whatsappOriginal
+    // FIX: Comparação correta - só true se realmente mudou
+    _whatsappAlterado: whatsappOriginal !== '' && whatsappAtual !== whatsappOriginal
   };
 }
 
-async function salvarConfig(){
-  const btn=document.getElementById('btnSalvar');
-  btn.disabled=true;
-  document.getElementById('btnSalvarText').textContent='Salvando...';
+async function salvarConfig() {
+  const btn = document.getElementById('btnSalvar');
+  const btnText = document.getElementById('btnSalvarText');
   
-  const dados=coletarDados();
+  btn.disabled = true;
+  btnText.innerHTML = '<span class="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full spinner"></span> Salvando...';
   
-  try{
-    const r=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({acao:'salvar',token,config:dados})});
-    const d=await r.json();
+  const dados = coletarDados();
+  
+  try {
+    const r = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ acao: 'salvar', token, config: dados })
+    });
+    const d = await r.json();
     
-    if(d.success){
-      if(dados._whatsappAlterado){
-        mostrarToast('✅ Salvo! WhatsApp alterado - solicite novo link.');
-        // Redirecionar ou avisar
-        setTimeout(()=>{
+    if (d.success) {
+      if (dados._whatsappAlterado) {
+        mostrarToast('✅ Salvo! WhatsApp alterado.');
+        setTimeout(() => {
           alert('WhatsApp alterado!\n\nEnvie /config no WhatsApp para obter um novo link de acesso.');
-        },1000);
-      }else{
+        }, 500);
+      } else {
         mostrarToast('✅ Configurações salvas!');
-        // Atualizar original
-        configOriginal={...dados};
-        whatsappOriginal=dados.WhatsApp;
-        logoAlterado=false;
-        logoBase64=null;
+        // Atualizar valores originais
+        configOriginal = {
+          URL_Imagem: dados._logoAlterado ? '_NOVO_' : configOriginal.URL_Imagem,
+          Nome_Empresa: dados.Nome_Empresa,
+          WhatsApp: dados.WhatsApp,
+          Idioma_Principal: dados.Idioma_Principal,
+          Pix: dados.Pix,
+          RUC: dados.RUC,
+          Localizacao: dados.Localizacao
+        };
+        whatsappOriginal = dados.WhatsApp;
+        logoAlterado = false;
+        logoBase64 = null;
+        
+        // Esconder warning do WhatsApp
+        document.getElementById('whatsappWarning').classList.add('hidden');
       }
-    }else{
-      mostrarToast('❌ '+(d.message||'Erro ao salvar'));
+    } else {
+      mostrarToast('❌ ' + (d.message || 'Erro ao salvar'));
     }
-  }catch(e){mostrarToast('❌ Erro de conexão');}
+  } catch (e) {
+    mostrarToast('❌ Erro de conexão');
+  }
   
-  btn.disabled=false;
-  document.getElementById('btnSalvarText').textContent='💾 Salvar Configurações';
+  btn.disabled = false;
+  btnText.textContent = '💾 Salvar Configurações';
 }
 
-function mostrarToast(m){
-  const t=document.getElementById('toast');
-  document.getElementById('toastMsg').textContent=m;
+function mostrarToast(m) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = m;
   t.classList.remove('hidden');
-  setTimeout(()=>t.classList.add('hidden'),3000);
+  setTimeout(() => t.classList.add('hidden'), 3000);
 }
 
-function mostrarErro(m){
+function mostrarErro(m) {
   document.getElementById('loading').classList.add('hidden');
   document.getElementById('erro').classList.remove('hidden');
-  document.getElementById('erroMsg').textContent=m;
+  document.getElementById('erroMsg').textContent = m;
 }
   </script>
 </body>
