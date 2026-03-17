@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loja - QueTal.me</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    *{font-family:'Inter',sans-serif}
+    
+    /* Hero Banner com Parallax */
+    .hero-banner {
+      position: relative;
+      width: 100%;
+      height: 50vh;
+      min-height: 280px;
+      max-height: 450px;
+      overflow: hidden;
+    }
+    
+    .hero-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 120%;
+      object-fit: cover;
+      transform: translateY(0);
+      will-change: transform;
+    }
+    
+    .hero-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.5) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .hero-logo {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 4px solid white;
+      object-fit: cover;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      background: white;
+    }
+    
+    .hero-title {
+      color: white;
+      font-size: 2rem;
+      font-weight: 700;
+      text-shadow: 2px 2px 10px rgba(0,0,0,0.6);
+      margin-top: 16px;
+      text-align: center;
+    }
+    
+    .hero-subtitle {
+      color: rgba(255,255,255,0.95);
+      font-size: 1.1rem;
+      text-shadow: 1px 1px 6px rgba(0,0,0,0.6);
+      margin-top: 6px;
+    }
+    
+    /* Header Fixo com transição de opacidade */
+    .header-fixed {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      background: rgba(16, 185, 129, 0);
+      backdrop-filter: blur(0px);
+      transition: all 0.25s ease;
+      padding: 10px 16px;
+    }
+    
+    .header-fixed.scrolled {
+      background: rgba(16, 185, 129, 0.97);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+    }
+    
+    .header-content {
+      max-width: 48rem;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .header-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255,255,255,0.8);
+      opacity: 0;
+      transform: scale(0.7);
+      transition: all 0.25s ease;
+      background: white;
+    }
+    
+    .header-fixed.scrolled .header-logo {
+      opacity: 1;
+      transform: scale(1);
+    }
+    
+    .header-title {
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      opacity: 0;
+      transition: all 0.25s ease;
+    }
+    
+    .header-fixed.scrolled .header-title {
+      opacity: 1;
+    }
+    
+    /* Barra de idiomas/bandeiras */
+    .language-bar {
+      background: #111827;
+      padding: 14px 8px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      transition: top 0.3s ease;
+    }
+    
+    .language-bar.with-header {
+      top: 56px;
+    }
+    
+    .flag-btn {
+      width: 52px;
+      height: 38px;
+      border-radius: 6px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: all 0.2s;
+      opacity: 0.75;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    
+    .flag-btn:hover, .flag-btn.active {
+      border-color: white;
+      opacity: 1;
+      transform: scale(1.08);
+    }
+    
+    .flag-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    /* Conteúdo principal */
+    .main-content {
+      background: #4b9cd3;
+      min-height: 50vh;
+      padding-bottom: 20px;
+    }
+    
+    .products-container {
+      max-width: 48rem;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    
+    /* Categoria */
+    .category-header {
+      background: rgba(0,0,0,0.2);
+      color: white;
+      padding: 10px 16px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin: 16px 0 8px 0;
+      border-radius: 8px;
+    }
+    
+    .category-header:first-child {
+      margin-top: 0;
+    }
+    
+    /* Cards de produto */
+    .product-card {
+      background: white;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      display: flex;
+      gap: 14px;
+    }
+    
+    .product-card.indisponivel {
+      opacity: 0.5;
+    }
+    
+    .product-image {
+      width: 70px;
+      height: 70px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #f3f4f6;
+    }
+    
+    .product-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .product-name {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #1f2937;
+      margin-bottom: 4px;
+    }
+    
+    .product-desc {
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-bottom: 8px;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    .product-prices {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+    }
+    
+    .price {
+      font-weight: 600;
+    }
+    
+    .price-gs { color: #059669; }
+    .price-usd { color: #2563eb; }
+    .price-brl { color: #dc2626; }
+    
+    .badge-indisponivel {
+      background: #fef2f2;
+      color: #dc2626;
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    
+    /* Footer com WhatsApp e PIX */
+    .footer-info {
+      background: white;
+      padding: 24px 16px;
+    }
+    
+    .footer-container {
+      max-width: 48rem;
+      margin: 0 auto;
+    }
+    
+    .footer-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 0;
+      font-size: 1rem;
+      color: #374151;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .footer-item:last-child {
+      border-bottom: none;
+    }
+    
+    .footer-icon {
+      font-size: 1.5rem;
+      width: 40px;
+      text-align: center;
+    }
+    
+    .footer-link {
+      color: #059669;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .footer-link:hover {
+      text-decoration: underline;
+    }
+    
+    /* WhatsApp floating button */
+    .whatsapp-float {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 60px;
+      height: 60px;
+      background: #25d366;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      z-index: 100;
+      transition: transform 0.2s;
+    }
+    
+    .whatsapp-float:hover {
+      transform: scale(1.1);
+    }
+    
+    .whatsapp-float img {
+      width: 32px;
+      height: 32px;
+    }
+    
+    /* Loading */
+    .spinner{animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #4b9cd3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+    
+    .loading-screen.hidden {
+      display: none;
+    }
+    
+    /* Erro */
+    .error-screen {
+      text-align: center;
+      padding: 60px 20px;
+      color: white;
+    }
+    
+    .error-icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+  
+  <!-- Loading Screen -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="inline-block w-12 h-12 border-4 border-white border-t-transparent rounded-full spinner"></div>
+    <p class="text-white mt-4 text-lg">Carregando catálogo...</p>
+  </div>
+  
+  <!-- Header Fixo (aparece ao rolar) -->
+  <header class="header-fixed" id="headerFixed">
+    <div class="header-content">
+      <img src="" alt="Logo" class="header-logo" id="headerLogo">
+      <span class="header-title" id="headerTitle">Loja</span>
+    </div>
+  </header>
+  
+  <!-- Hero Banner com Parallax -->
+  <div class="hero-banner" id="heroBanner">
+    <img src="https://images.unsplash.com/photo-1495195134817-aeb325a55b65?w=1200" alt="Banner" class="hero-image" id="heroImage">
+    <div class="hero-overlay">
+      <img src="" alt="Logo" class="hero-logo" id="heroLogo">
+      <h1 class="hero-title" id="heroTitle">Carregando...</h1>
+      <p class="hero-subtitle" id="heroSubtitle"></p>
+    </div>
+  </div>
+  
+  <!-- Barra de Idiomas/Bandeiras -->
+  <div class="language-bar" id="languageBar">
+    <div class="flag-btn" data-lang="pt" title="Português">
+      <img src="https://flagcdn.com/w80/br.png" alt="Brasil">
+    </div>
+    <div class="flag-btn" data-lang="es" title="Español">
+      <img src="https://flagcdn.com/w80/es.png" alt="España">
+    </div>
+    <div class="flag-btn" data-lang="en" title="English">
+      <img src="https://flagcdn.com/w80/us.png" alt="USA">
+    </div>
+    <div class="flag-btn" data-lang="zh" title="中文">
+      <img src="https://flagcdn.com/w80/cn.png" alt="China">
+    </div>
+    <div class="flag-btn" data-lang="ko" title="한국어">
+      <img src="https://flagcdn.com/w80/kr.png" alt="Korea">
+    </div>
+    <div class="flag-btn" data-lang="ja" title="日本語">
+      <img src="https://flagcdn.com/w80/jp.png" alt="Japan">
+    </div>
+    <div class="flag-btn" data-lang="de" title="Deutsch">
+      <img src="https://flagcdn.com/w80/de.png" alt="Germany">
+    </div>
+    <div class="flag-btn" data-lang="gn" title="Guaraní">
+      <img src="https://flagcdn.com/w80/py.png" alt="Paraguay">
+    </div>
+  </div>
+  
+  <!-- Conteúdo Principal -->
+  <div class="main-content">
+    <div class="products-container" id="productsContainer">
+      <!-- Produtos serão inseridos aqui -->
+    </div>
+  </div>
+  
+  <!-- Footer com informações -->
+  <div class="footer-info">
+    <div class="footer-container">
+      <div class="footer-item" id="footerWhatsApp">
+        <span class="footer-icon">📱</span>
+        <div>
+          <div style="font-size: 0.8rem; color: #9ca3af;">WhatsApp</div>
+          <a href="#" class="footer-link" id="linkWhatsApp">Carregando...</a>
+        </div>
+      </div>
+      <div class="footer-item" id="footerPix" style="display:none">
+        <span class="footer-icon">💳</span>
+        <div>
+          <div style="font-size: 0.8rem; color: #9ca3af;">Chave PIX</div>
+          <span id="textPix"></span>
+        </div>
+      </div>
+      <div class="footer-item" id="footerLocalizacao" style="display:none">
+        <span class="footer-icon">📍</span>
+        <div>
+          <div style="font-size: 0.8rem; color: #9ca3af;">Localização</div>
+          <a href="#" target="_blank" class="footer-link" id="linkLocalizacao">Ver no Google Maps</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- WhatsApp Floating Button -->
+  <a href="#" class="whatsapp-float" id="whatsappFloat" target="_blank">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+  </a>
+  
+  <script>
+// Configuração - Altere o slug da loja aqui
+const WEBHOOK_URL = 'https://webhook.quetal.me/webhook/eCatalogo';
+const SLUG = new URLSearchParams(location.search).get('loja') || 'demo';
+
+// Dados da loja
+let config = {};
+let produtos = [];
+let idiomaAtual = 'pt';
+
+// Mapeamento de idiomas para colunas
+const IDIOMAS = {
+  pt: { nome: 'Nome_Produto', desc: 'Descricao', flag: 'br' },
+  es: { nome: 'Nome_ES', desc: 'Descricao_ES', flag: 'es' },
+  en: { nome: 'Nome_EN', desc: 'Descricao_EN', flag: 'us' },
+  zh: { nome: 'Nome_ZH', desc: 'Descricao_ZH', flag: 'cn' },
+  ko: { nome: 'Nome_KO', desc: 'Descricao_KO', flag: 'kr' },
+  ja: { nome: 'Nome_JA', desc: 'Descricao_JA', flag: 'jp' },
+  de: { nome: 'Nome_DE', desc: 'Descricao_DE', flag: 'de' },
+  gn: { nome: 'Nome_GN', desc: 'Descricao_GN', flag: 'py' }
+};
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', () => {
+  carregarCatalogo();
+  setupScrollEffect();
+  setupLanguageSelector();
+});
+
+// Carregar dados do webhook
+async function carregarCatalogo() {
+  try {
+    const response = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ acao: 'catalogo', slug: SLUG })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      config = data.config || {};
+      produtos = (data.produtos || []).filter(p => p.Status === 'Disponível' || p.Status === 'Indisponível');
+      
+      // Definir idioma baseado na config
+      if (config.Idioma_Principal) {
+        idiomaAtual = config.Idioma_Principal.toLowerCase().includes('espa') ? 'es' : 'pt';
+      }
+      
+      atualizarInterface();
+      document.getElementById('loadingScreen').classList.add('hidden');
+    } else {
+      mostrarErro(data.message || 'Loja não encontrada');
+    }
+  } catch (error) {
+    console.error('Erro:', error);
+    mostrarErro('Erro ao carregar catálogo');
+  }
+}
+
+// Atualizar interface com os dados
+function atualizarInterface() {
+  // Hero
+  document.getElementById('heroTitle').textContent = config.Nome_Empresa || 'Loja';
+  document.getElementById('headerTitle').textContent = config.Nome_Empresa || 'Loja';
+  document.title = (config.Nome_Empresa || 'Loja') + ' - QueTal.me';
+  
+  if (config.URL_Imagem) {
+    document.getElementById('heroLogo').src = config.URL_Imagem;
+    document.getElementById('headerLogo').src = config.URL_Imagem;
+  }
+  
+  // Subtítulo (pode customizar)
+  document.getElementById('heroSubtitle').textContent = '';
+  
+  // WhatsApp
+  const whatsapp = config.WhatsApp || '';
+  if (whatsapp) {
+    const linkWpp = 'https://wa.me/' + whatsapp.replace(/\D/g, '');
+    document.getElementById('linkWhatsApp').href = linkWpp;
+    document.getElementById('linkWhatsApp').textContent = formatarTelefone(whatsapp);
+    document.getElementById('whatsappFloat').href = linkWpp;
+  }
+  
+  // PIX
+  if (config.Pix) {
+    document.getElementById('footerPix').style.display = 'flex';
+    document.getElementById('textPix').textContent = config.Pix;
+  }
+  
+  // Localização
+  if (config.Localizacao) {
+    document.getElementById('footerLocalizacao').style.display = 'flex';
+    document.getElementById('linkLocalizacao').href = config.Localizacao;
+  }
+  
+  // Marcar idioma ativo
+  document.querySelectorAll('.flag-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === idiomaAtual);
+  });
+  
+  // Renderizar produtos
+  renderizarProdutos();
+}
+
+// Renderizar lista de produtos
+function renderizarProdutos() {
+  const container = document.getElementById('productsContainer');
+  
+  if (!produtos.length) {
+    container.innerHTML = `
+      <div class="error-screen">
+        <div class="error-icon">📭</div>
+        <p>Nenhum produto disponível no momento</p>
+      </div>
+    `;
+    return;
+  }
+  
+  // Agrupar por categoria
+  const categorias = {};
+  produtos.forEach(p => {
+    const cat = p.Sessao || 'Outros';
+    if (!categorias[cat]) categorias[cat] = [];
+    categorias[cat].push(p);
+  });
+  
+  let html = '';
+  
+  for (const [categoria, prods] of Object.entries(categorias)) {
+    html += `<div class="category-header">${categoria}</div>`;
+    
+    prods.forEach(p => {
+      const indisponivel = p.Status === 'Indisponível';
+      const idiomaCfg = IDIOMAS[idiomaAtual] || IDIOMAS.pt;
+      
+      // Nome e descrição no idioma atual (fallback para PT)
+      const nome = p[idiomaCfg.nome] || p.Nome_Produto || 'Produto';
+      const desc = p[idiomaCfg.desc] || p.Descricao || '';
+      
+      // Imagem
+      const img = p.Imagens || 'https://via.placeholder.com/70x70?text=📦';
+      
+      // Preços
+      const precoGs = p.Preco_Guarani ? formatarPreco(p.Preco_Guarani, 'Gs.') : '';
+      const precoUsd = p.Preco_Dolar ? '$' + Number(p.Preco_Dolar).toFixed(2) : '';
+      const precoBrl = p.Preco_Real ? 'R$ ' + Number(p.Preco_Real).toFixed(2).replace('.', ',') : '';
+      
+      html += `
+        <div class="product-card ${indisponivel ? 'indisponivel' : ''}">
+          <img src="${img}" alt="${nome}" class="product-image" onerror="this.src='https://via.placeholder.com/70x70?text=📦'">
+          <div class="product-info">
+            <div class="product-name">${nome}</div>
+            ${desc ? `<div class="product-desc">${desc}</div>` : ''}
+            <div class="product-prices">
+              ${precoGs ? `<span class="price price-gs">${precoGs}</span>` : ''}
+              ${precoUsd ? `<span class="price price-usd">${precoUsd}</span>` : ''}
+              ${precoBrl ? `<span class="price price-brl">${precoBrl}</span>` : ''}
+              ${indisponivel ? `<span class="badge-indisponivel">Indisponível</span>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  }
+  
+  container.innerHTML = html;
+}
+
+// Efeito de scroll/parallax
+function setupScrollEffect() {
+  const headerFixed = document.getElementById('headerFixed');
+  const heroImage = document.getElementById('heroImage');
+  const languageBar = document.getElementById('languageBar');
+  
+  let ticking = false;
+  
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        const scrollY = window.scrollY;
+        const bannerHeight = document.getElementById('heroBanner').offsetHeight;
+        
+        // Parallax na imagem
+        heroImage.style.transform = `translateY(${scrollY * 0.4}px)`;
+        
+        // Progresso do scroll
+        const progress = Math.min(scrollY / (bannerHeight * 0.7), 1);
+        
+        // Header aparece gradualmente
+        if (progress > 0.3) {
+          headerFixed.classList.add('scrolled');
+          languageBar.classList.add('with-header');
+          headerFixed.style.background = `rgba(16, 185, 129, ${Math.min((progress - 0.3) / 0.3, 1) * 0.97})`;
+        } else {
+          headerFixed.classList.remove('scrolled');
+          languageBar.classList.remove('with-header');
+          headerFixed.style.background = 'rgba(16, 185, 129, 0)';
+        }
+        
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+}
+
+// Seletor de idioma
+function setupLanguageSelector() {
+  document.querySelectorAll('.flag-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.flag-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      idiomaAtual = btn.dataset.lang;
+      renderizarProdutos();
+    });
+  });
+}
+
+// Utilitários
+function formatarPreco(valor, sufixo = '') {
+  const num = Number(String(valor).replace(/\D/g, ''));
+  return num.toLocaleString('es-PY') + (sufixo ? sufixo : '');
+}
+
+function formatarTelefone(tel) {
+  const limpo = tel.replace(/\D/g, '');
+  if (limpo.startsWith('595')) {
+    return '+' + limpo.slice(0, 3) + ' ' + limpo.slice(3, 6) + ' ' + limpo.slice(6);
+  }
+  if (limpo.startsWith('55')) {
+    return '+' + limpo.slice(0, 2) + ' ' + limpo.slice(2, 4) + ' ' + limpo.slice(4);
+  }
+  return '+' + limpo;
+}
+
+function mostrarErro(msg) {
+  document.getElementById('loadingScreen').classList.add('hidden');
+  document.getElementById('productsContainer').innerHTML = `
+    <div class="error-screen">
+      <div class="error-icon">⚠️</div>
+      <p>${msg}</p>
+    </div>
+  `;
+}
+  </script>
+</body>
+</html>
