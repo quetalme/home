@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loja - QueTal.me</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    *{font-family:'Inter',sans-serif}
+    
+    /* Hero Banner com Parallax */
+    .hero-banner {
+      position: relative;
+      width: 100%;
+      height: 50vh;
+      min-height: 280px;
+      max-height: 450px;
+      overflow: hidden;
+    }
+    
+    .hero-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 120%;
+      object-fit: cover;
+      transform: translateY(0);
+      will-change: transform;
+    }
+    
+    .hero-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.5) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .hero-logo {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 4px solid white;
+      object-fit: cover;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+    
+    .hero-title {
+      color: white;
+      font-size: 2rem;
+      font-weight: 700;
+      text-shadow: 2px 2px 10px rgba(0,0,0,0.6);
+      margin-top: 16px;
+      text-align: center;
+    }
+    
+    .hero-subtitle {
+      color: rgba(255,255,255,0.95);
+      font-size: 1.1rem;
+      text-shadow: 1px 1px 6px rgba(0,0,0,0.6);
+      margin-top: 6px;
+    }
+    
+    /* Header Fixo com transição de opacidade */
+    .header-fixed {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      background: rgba(16, 185, 129, 0);
+      backdrop-filter: blur(0px);
+      transition: all 0.25s ease;
+      padding: 10px 16px;
+    }
+    
+    .header-fixed.scrolled {
+      background: rgba(16, 185, 129, 0.97);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+    }
+    
+    .header-content {
+      max-width: 48rem;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .header-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255,255,255,0.8);
+      opacity: 0;
+      transform: scale(0.7);
+      transition: all 0.25s ease;
+    }
+    
+    .header-fixed.scrolled .header-logo {
+      opacity: 1;
+      transform: scale(1);
+    }
+    
+    .header-title {
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      opacity: 0;
+      transition: all 0.25s ease;
+    }
+    
+    .header-fixed.scrolled .header-title {
+      opacity: 1;
+    }
+    
+    /* Barra de idiomas/bandeiras */
+    .language-bar {
+      background: #111827;
+      padding: 14px 8px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      transition: top 0.3s ease;
+    }
+    
+    .language-bar.with-header {
+      top: 56px;
+    }
+    
+    .flag-btn {
+      width: 52px;
+      height: 38px;
+      border-radius: 6px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: all 0.2s;
+      opacity: 0.75;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    
+    .flag-btn:hover, .flag-btn.active {
+      border-color: white;
+      opacity: 1;
+      transform: scale(1.08);
+    }
+    
+    .flag-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    /* Conteúdo principal */
+    .main-content {
+      background: #4b9cd3;
+      min-height: 100vh;
+      padding-bottom: 100px;
+    }
+    
+    .products-container {
+      max-width: 48rem;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    
+    /* Cards de produto */
+    .product-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      display: flex;
+      gap: 14px;
+    }
+    
+    .product-image {
+      width: 70px;
+      height: 70px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    
+    .product-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .product-name {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #1f2937;
+      margin-bottom: 4px;
+    }
+    
+    .product-desc {
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    
+    .product-prices {
+      display: flex;
+      gap: 16px;
+      font-size: 0.9rem;
+    }
+    
+    .price {
+      font-weight: 600;
+    }
+    
+    .price-gs { color: #059669; }
+    .price-usd { color: #2563eb; }
+    .price-brl { color: #dc2626; }
+    
+    /* Footer com WhatsApp e PIX */
+    .footer-info {
+      background: white;
+      padding: 24px 16px;
+      text-align: center;
+    }
+    
+    .footer-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 0;
+      font-size: 1.1rem;
+      color: #374151;
+    }
+    
+    .footer-item img {
+      height: 32px;
+    }
+    
+    /* Animação de loading */
+    .spinner{animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body class="bg-gray-100">
+  
+  <!-- Header Fixo (aparece ao rolar) -->
+  <header class="header-fixed" id="headerFixed">
+    <div class="header-content">
+      <img src="" alt="Logo" class="header-logo" id="headerLogo">
+      <span class="header-title" id="headerTitle">Nome da Loja</span>
+    </div>
+  </header>
+  
+  <!-- Hero Banner com Parallax -->
+  <div class="hero-banner" id="heroBanner">
+    <img src="https://images.unsplash.com/photo-1495195134817-aeb325a55b65?w=1200" alt="Banner" class="hero-image" id="heroImage">
+    <div class="hero-overlay">
+      <img src="https://via.placeholder.com/100" alt="Logo" class="hero-logo" id="heroLogo">
+      <h1 class="hero-title" id="heroTitle">Nome da Loja</h1>
+      <p class="hero-subtitle" id="heroSubtitle">Produtos Naturais e Integrais</p>
+    </div>
+  </div>
+  
+  <!-- Barra de Idiomas/Bandeiras -->
+  <div class="language-bar" id="languageBar">
+    <div class="flag-btn active" data-lang="pt" title="Português">
+      <img src="https://flagcdn.com/w80/br.png" alt="Brasil">
+    </div>
+    <div class="flag-btn" data-lang="es" title="Español">
+      <img src="https://flagcdn.com/w80/es.png" alt="España">
+    </div>
+    <div class="flag-btn" data-lang="en" title="English">
+      <img src="https://flagcdn.com/w80/us.png" alt="USA">
+    </div>
+    <div class="flag-btn" data-lang="zh" title="中文">
+      <img src="https://flagcdn.com/w80/cn.png" alt="China">
+    </div>
+    <div class="flag-btn" data-lang="ko" title="한국어">
+      <img src="https://flagcdn.com/w80/kr.png" alt="Korea">
+    </div>
+    <div class="flag-btn" data-lang="ja" title="日本語">
+      <img src="https://flagcdn.com/w80/jp.png" alt="Japan">
+    </div>
+    <div class="flag-btn" data-lang="de" title="Deutsch">
+      <img src="https://flagcdn.com/w80/de.png" alt="Germany">
+    </div>
+    <div class="flag-btn" data-lang="gn" title="Guaraní">
+      <img src="https://flagcdn.com/w80/py.png" alt="Paraguay">
+    </div>
+  </div>
+  
+  <!-- Conteúdo Principal -->
+  <div class="main-content">
+    <div class="products-container" id="productsContainer">
+      
+      <!-- Loading -->
+      <div id="loading" class="text-center py-12 hidden">
+        <div class="inline-block w-8 h-8 border-4 border-white border-t-transparent rounded-full spinner"></div>
+        <p class="text-white mt-2">Carregando produtos...</p>
+      </div>
+      
+      <!-- Produtos de exemplo -->
+      <div class="product-card">
+        <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=150" alt="Produto" class="product-image">
+        <div class="product-info">
+          <div class="product-name">Pudim de Banana</div>
+          <div class="product-desc">Feito com farinha de trigo integral, banana, ovos, óleo de girassol, açúcar mascavo e sal.</div>
+          <div class="product-prices">
+            <span class="price price-gs">15.000Gs.</span>
+            <span class="price price-usd">$2,00</span>
+            <span class="price price-brl">R$ 12,00</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="product-card">
+        <img src="https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=150" alt="Produto" class="product-image">
+        <div class="product-info">
+          <div class="product-name">Bolo Integral de Cenoura</div>
+          <div class="product-desc">Bolo caseiro feito com cenoura orgânica, farinha integral e cobertura de chocolate.</div>
+          <div class="product-prices">
+            <span class="price price-gs">25.000Gs.</span>
+            <span class="price price-usd">$3,50</span>
+            <span class="price price-brl">R$ 20,00</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="product-card">
+        <img src="https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=150" alt="Produto" class="product-image">
+        <div class="product-info">
+          <div class="product-name">Granola Artesanal</div>
+          <div class="product-desc">Mix de aveia, castanhas, mel e frutas secas. Perfeita para o café da manhã.</div>
+          <div class="product-prices">
+            <span class="price price-gs">18.000Gs.</span>
+            <span class="price price-usd">$2,50</span>
+            <span class="price price-brl">R$ 15,00</span>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+    
+    <!-- Footer com informações -->
+    <div class="footer-info">
+      <div class="footer-item">
+        <span style="font-size: 1.5rem">📱</span>
+        <span><strong>WhatsApp:</strong> +595 984 000 449</span>
+      </div>
+      <div class="footer-item">
+        <span style="font-size: 1.5rem">💳</span>
+        <span><strong>Pix:</strong> CPF 040.100.114-83</span>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Elementos
+    const headerFixed = document.getElementById('headerFixed');
+    const heroBanner = document.getElementById('heroBanner');
+    const heroImage = document.getElementById('heroImage');
+    const languageBar = document.getElementById('languageBar');
+    
+    // Altura inicial do banner
+    const bannerInitialHeight = heroBanner.offsetHeight;
+    const headerHeight = 56;
+    
+    // Scroll listener para efeito parallax
+    let ticking = false;
+    
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    });
+    
+    function handleScroll() {
+      const scrollY = window.scrollY;
+      const bannerHeight = heroBanner.offsetHeight;
+      
+      // Efeito parallax na imagem do hero (move mais devagar que o scroll)
+      const parallaxSpeed = 0.4;
+      heroImage.style.transform = `translateY(${scrollY * parallaxSpeed}px)`;
+      
+      // Calcular progresso do scroll (0 a 1)
+      const scrollProgress = Math.min(scrollY / (bannerHeight * 0.7), 1);
+      
+      // Header: aparece gradualmente
+      if (scrollProgress > 0.3) {
+        headerFixed.classList.add('scrolled');
+        languageBar.classList.add('with-header');
+      } else {
+        headerFixed.classList.remove('scrolled');
+        languageBar.classList.remove('with-header');
+      }
+      
+      // Opacidade do header baseada no scroll
+      const headerOpacity = Math.min((scrollProgress - 0.3) / 0.3, 1);
+      if (scrollProgress > 0.3) {
+        headerFixed.style.background = `rgba(16, 185, 129, ${headerOpacity * 0.97})`;
+      } else {
+        headerFixed.style.background = 'rgba(16, 185, 129, 0)';
+      }
+    }
+    
+    // Seleção de idioma
+    document.querySelectorAll('.flag-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.flag-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const lang = btn.dataset.lang;
+        // Aqui você pode implementar a troca de idioma
+        console.log('Idioma selecionado:', lang);
+      });
+    });
+    
+    // Simular carregamento de dados
+    function carregarDados(config) {
+      // Atualizar hero
+      if (config.bannerUrl) {
+        document.getElementById('heroImage').src = config.bannerUrl;
+      }
+      if (config.logoUrl) {
+        document.getElementById('heroLogo').src = config.logoUrl;
+        document.getElementById('headerLogo').src = config.logoUrl;
+      }
+      if (config.nomeEmpresa) {
+        document.getElementById('heroTitle').textContent = config.nomeEmpresa;
+        document.getElementById('headerTitle').textContent = config.nomeEmpresa;
+      }
+      if (config.subtitulo) {
+        document.getElementById('heroSubtitle').textContent = config.subtitulo;
+      }
+    }
+    
+    // Exemplo de uso:
+    // carregarDados({
+    //   bannerUrl: 'https://...',
+    //   logoUrl: 'https://...',
+    //   nomeEmpresa: 'Sentido Común',
+    //   subtitulo: 'Integrales y Naturales'
+    // });
+  </script>
+</body>
+</html>
