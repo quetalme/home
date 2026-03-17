@@ -66,6 +66,55 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* ========== HERO PARALLAX ========== */
+        .hero {
+            position: relative;
+            height: 50vh;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: blur(3px);
+            transform: scale(1.1);
+            transition: background-image 0.5s ease;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                to bottom,
+                rgba(0, 0, 0, 0.4) 0%,
+                rgba(0, 0, 0, 0.6) 100%
+            );
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 8vw, 4rem);
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            margin: 0;
+        }
+
+        /* ========== HEADER STICKY ========== */
         header {
             position: sticky;
             top: 0;
@@ -474,7 +523,7 @@
 
         .toast {
             position: fixed;
-            bottom: 24px;
+            bottom: 70px;
             left: 50%;
             transform: translateX(-50%) translateY(100px);
             background: var(--primary-dark);
@@ -490,6 +539,7 @@
 
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+        /* ========== FOOTER FIXO ========== */
         footer {
             position: fixed;
             bottom: 0;
@@ -514,13 +564,14 @@
         }
 
         main {
-            padding-bottom: 140px !important;
+            padding-bottom: 80px !important;
         }
 
         @media (max-width: 768px) {
             .header-content { flex-wrap: wrap; gap: 12px; }
             .lang-selector { order: 3; width: 100%; }
             .lang-btn { width: 32px; height: 32px; }
+            .hero { height: 40vh; min-height: 250px; }
         }
 
         @media (max-width: 640px) {
@@ -532,6 +583,7 @@
             .price-main { font-size: 1.2rem; }
             .section-title { font-size: 1.4rem; }
             .cart-sidebar { max-width: 100%; }
+            .hero-title { font-size: clamp(1.5rem, 7vw, 2.5rem); }
         }
     </style>
 </head>
@@ -540,6 +592,15 @@
         <div class="loader"></div>
         <p class="loading-text" id="loadingText">Cargando...</p>
     </div>
+
+    <!-- HERO COM PARALLAX -->
+    <section class="hero" id="hero">
+        <div class="hero-bg" id="heroBg"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-title" id="heroTitle">Carregando...</h1>
+        </div>
+    </section>
 
     <header>
         <div class="header-content">
@@ -801,18 +862,9 @@
                     config[key] = row[1];
                 }
             });
-            // Pegar nome da empresa do B2 (linha 2, coluna B)
-            if (data[1] && data[1][1]) {
-                config.nome_empresa = data[1][1];
-            }
-            // Pegar WhatsApp do B3 (linha 3, coluna B)
-            if (data[2] && data[2][1]) {
-                config.whatsapp_numero = data[2][1];
-            }
-            // Pegar idioma principal do B4 (linha 4, coluna B)
-            if (data[3] && data[3][1]) {
-                config.idioma_principal = data[3][1];
-            }
+            if (data[1] && data[1][1]) config.nome_empresa = data[1][1];
+            if (data[2] && data[2][1]) config.whatsapp_numero = data[2][1];
+            if (data[3] && data[3][1]) config.idioma_principal = data[3][1];
             return config;
         }
 
@@ -984,15 +1036,12 @@
                 loc = `https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
             } catch (e) {}
 
-            // Idioma principal do vendedor (B4) e idioma do cliente
             const idiomaVendedor = state.config.idioma_principal || 'es';
             const idiomaCliente = state.currentLang;
             
-            // Funções de tradução
             const tv = (key) => CONFIG.TRANSLATIONS[idiomaVendedor]?.[key] || CONFIG.TRANSLATIONS.es[key] || key;
             const tc = (key) => CONFIG.TRANSLATIONS[idiomaCliente]?.[key] || CONFIG.TRANSLATIONS.es[key] || key;
             
-            // Nome do idioma do cliente
             const nomesIdiomas = {
                 'es': 'Español', 'pt-BR': 'Português', 'en': 'English', 'gn': 'Guaraní',
                 'zh-CN': '中文', 'ar': 'العربية', 'ko': '한국어', 'ja': '日本語',
@@ -1001,11 +1050,9 @@
             };
             const nomeIdiomaCliente = nomesIdiomas[idiomaCliente] || idiomaCliente;
 
-            // Traduções dos produtos - vendedor e cliente
             const transVendedor = state.translations[idiomaVendedor] || [];
             const transCliente = state.translations[idiomaCliente] || [];
             
-            // Montar mensagem bilíngue
             let msg = `🌐 ${tv('clientLang') || 'Idioma del cliente'}: ${nomeIdiomaCliente}\n`;
             msg += `${tv('orderTitle')} [${tc('orderTitle')}]\n\n`;
             msg += `📦 ${tv('products')} [${tc('products')}]:\n`;
@@ -1064,6 +1111,28 @@
             localStorage.setItem('lang', lang);
         }
 
+        // ========== PARALLAX ==========
+        function setupParallax() {
+            const heroBg = document.getElementById('heroBg');
+            let ticking = false;
+            
+            window.addEventListener('scroll', () => {
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        const scrollY = window.scrollY;
+                        const heroHeight = document.getElementById('hero').offsetHeight;
+                        
+                        if (scrollY <= heroHeight) {
+                            // Efeito parallax: imagem move mais devagar (0.4x)
+                            heroBg.style.transform = `scale(1.1) translateY(${scrollY * 0.4}px)`;
+                        }
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            });
+        }
+
         function setup() {
             document.querySelectorAll('.lang-btn').forEach(b => b.addEventListener('click', () => changeLang(b.dataset.lang)));
             document.getElementById('cartBtn').addEventListener('click', () => {
@@ -1077,6 +1146,9 @@
             document.getElementById('cartClose').addEventListener('click', close);
             document.getElementById('cartOverlay').addEventListener('click', close);
             document.getElementById('checkoutBtn').addEventListener('click', checkout);
+            
+            // Ativar parallax
+            setupParallax();
         }
 
         async function init() {
@@ -1097,25 +1169,25 @@
             state.translations[state.currentLang] = translations;
             state.whatsapp = (config.whatsapp_numero || config.whatsapp || '').replace(/\D/g, '');
 
-            // Carregar traduções do idioma do vendedor (B4) para o checkout
             const idiomaVendedor = config.idioma_principal || 'es';
             if (idiomaVendedor !== state.currentLang && !state.translations[idiomaVendedor]) {
                 state.translations[idiomaVendedor] = await loadTranslations(idiomaVendedor);
             }
 
-            console.log('WhatsApp número:', state.whatsapp);
-            console.log('Idioma vendedor:', idiomaVendedor);
-
-            // Nome da empresa do B2 da Config
+            // Nome da empresa
             const brandName = config.nome_empresa || config.nome_da_empresa || 'Tienda';
             document.getElementById('brandName').textContent = brandName;
+            document.getElementById('heroTitle').textContent = brandName;
             document.title = brandName;
 
-            // Logo
+            // Logo no header
             if (config.url_imagem) {
                 const logo = document.getElementById('brandLogo');
                 logo.src = config.url_imagem;
                 logo.onload = () => logo.classList.add('loaded');
+                
+                // Hero background com a logo
+                document.getElementById('heroBg').style.backgroundImage = `url('${config.url_imagem}')`;
             }
 
             renderProducts();
